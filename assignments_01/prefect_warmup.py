@@ -22,7 +22,8 @@ def summarize_data(series):
     }
 
 @flow
-def pipeline_flow(arr):
+def pipeline_flow():
+    arr = np.array([12.0, 15.0, np.nan, 14.0, 10.0, np.nan, 18.0, 14.0, 16.0, 22.0, np.nan, 13.0])
     X = create_series(arr)
     X = clean_data(X)
     summary = summarize_data(X)
@@ -32,8 +33,9 @@ def pipeline_flow(arr):
 
 
 if __name__ == "__main__":
-    arr = np.array([12.0, 15.0, np.nan, 14.0, 10.0, np.nan, 18.0, 14.0, 16.0, 22.0, np.nan, 13.0])
-    pipeline_flow(arr)
+    pipeline_flow()
 
-# 1. The pipeline being this simple, running a python script directly is much faster than having to route through local server/database and UI interface.
-# 2. Setting up a framework like Prefect allows us to monitor the data pipeline by decoupling it with execution. We can track whether it succeeded via the UI, and schedule jobs without changing the codes.
+'''
+1. The pipeline being this simple, running a python script directly is much faster than having to route through local server/database and UI interface.
+2. Setting up a framework like Prefect allows us to monitor the data pipeline by decoupling it with execution. We can track whether it succeeded via the UI, and schedule jobs without changing the codes.
+'''

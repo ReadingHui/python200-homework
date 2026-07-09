@@ -70,7 +70,7 @@ def visualization(df):
     # Scatterplot
     plt.figure()
     sns.scatterplot(df, x='GDP per capita', y='Happiness score')
-    plt.title('Boxplot of Happiness score by year')
+    plt.title('Scatterplot of GDP per capita vs Happiness score by year')
     plt.tight_layout()
     plt.savefig(OUTPUT_PATH + 'gdp_vs_happiness.png')
     logger.info('gdp_vs_happiness.png saved.')
@@ -146,8 +146,8 @@ def correlations(df):
 @task
 def summary(df, score_by_region, msg, sig_var):
     logger = get_run_logger()
-    logger.info(f'Total number of countries: {df['Country'].nunique()}')
-    logger.info(f'Total number of years: {df['Year'].nunique()}')
+    logger.info(f"Total number of countries: {df['Country'].nunique()}")
+    logger.info(f"Total number of years: {df['Year'].nunique()}")
     logger.info(f'Top 3 regions by mean happiness score:\n {score_by_region.head(3)}')
     logger.info(f'Bottom 3 regions by mean happiness score:\n {score_by_region.tail(3)}')
     logger.info(f'Result of t-test pre/post-2020: {msg}')
