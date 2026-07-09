@@ -115,8 +115,8 @@ def hyp_test(df):
     logger.info(f'T-test result:')
     logger.info(f't-statistic: {res.statistic}')
     logger.info(f'p-value: {res.pvalue}')
-    logger.info(f'Mean Happiness score in North America and ANZ: {region_scores['NA_ANZ'].mean()}')
-    logger.info(f'Mean Happiness score in South Asia: {region_scores['SAsia'].mean()}')
+    logger.info(f"Mean Happiness score in North America and ANZ: {region_scores['NA_ANZ'].mean()}")
+    logger.info(f"Mean Happiness score in South Asia: {region_scores['SAsia'].mean()}")
     if res.pvalue < 0.05:
         logger.info('Mean happiness Score in North America and ANZ is statistically significant to be different than South Asia.')
     else:
