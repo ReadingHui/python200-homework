@@ -272,13 +272,15 @@ res1 = stats.ttest_ind(group_a, group_b)
 print(f'T-test result:')
 print(f't-statistic: {res1.statistic}')
 print(f'p-value: {res1.pvalue}')
+print()
 
 # Hypothesis Q2
 print_title('Hypothesis Q2', 1)
-if res1.pvalue <= 0.05:
-    print('p-value smaller than 0.05, result is not significant.')
+if res1.pvalue < 0.05:
+    print('p-value smaller than 0.05, result is significant.')
 else:
     print('p-value larger than 0.05, result is not significant.')
+print()
 
 # Hypothesis Q3
 print_title('Hypothesis Q3', 1)
@@ -288,6 +290,7 @@ res3 = stats.ttest_rel(before, after)
 print(f'T-test result:')
 print(f't-statistic: {res3.statistic}')
 print(f'p-value: {res3.pvalue}')
+print()
 
 # Hypothesis Q4
 print_title('Hypothesis Q4', 1)
@@ -296,6 +299,7 @@ res4 = stats.ttest_1samp(scores, 70)
 print(f'T-test result:')
 print(f't-statistic: {res4.statistic}')
 print(f'p-value: {res4.pvalue}')
+print()
 
 # Hypothesis Q5
 print_title('Hypothesis Q5', 1)
@@ -303,7 +307,10 @@ res5 = stats.ttest_ind(group_a, group_b, alternative='greater')
 print(f'T-test result:')
 print(f't-statistic: {res5.statistic}')
 print(f'p-value: {res5.pvalue}')
+print()
 
+# Hypothesis Q6
+print_title('Hypothesis Q6', 1)
 print('From the result of Hypothesis test Q2 and Q5, we see that it is highly likely the mean of group a is lower than that of group b is not by chance.')
 
 # --- Correlation ---
