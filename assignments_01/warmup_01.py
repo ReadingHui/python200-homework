@@ -234,7 +234,7 @@ plt.show()
 print_title('Descriptive Stats Q4', 1)
 normal_data = np.random.normal(50, 5, 200)
 skewed_data = np.random.exponential(10, 200)
-fig = plt.boxplot((normal_data, skewed_data), label=['Normal', 'Skewed'], patch_artist=True)
+fig = plt.boxplot((normal_data, skewed_data), label=['Normal', 'Exponential'], patch_artist=True)
 colors = ['orange', 'lightblue']
 for patch, color in zip(fig['boxes'], colors):
     patch.set_facecolor(color)
@@ -311,7 +311,7 @@ print()
 
 # Hypothesis Q6
 print_title('Hypothesis Q6', 1)
-print('From the result of Hypothesis test Q2 and Q5, we see that it is highly likely the mean of group a is lower than that of group b is not by chance.')
+print('Since both p-value from Q2 and Q5 are < 0.05, we see that it is highly likely the mean of group a is lower than that of group b is not by chance.')
 
 # --- Correlation ---
 print_title('Correlation', 2)
