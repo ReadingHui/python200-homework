@@ -35,7 +35,6 @@ def pipeline_flow():
 if __name__ == "__main__":
     pipeline_flow()
 
-'''
-1. The pipeline being this simple, running a python script directly is much faster than having to route through local server/database and UI interface.
-2. Setting up a framework like Prefect allows us to monitor the data pipeline by decoupling it with execution. We can track whether it succeeded via the UI, and schedule jobs without changing the codes.
-'''
+
+# 1. The pipeline being this simple, running a python script directly is much faster than having to route through local server/database and UI interface.
+# 2. Setting up a framework like Prefect allows us to monitor the data pipeline by decoupling it with execution. We can track whether it succeeded via the UI, and schedule jobs without changing the codes.

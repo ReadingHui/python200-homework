@@ -61,14 +61,14 @@ print()
 print_title('Pandas Q6', 1)
 df['city'] = df['city'].replace('Austin', 'Houston')
 print_title('Replace Austin by Houston')
-print(df)
+print(df[['name', 'city']])
 print()
 
 # Pandas Q7
 print_title('Pandas Q7', 1)
 df = df.sort_values(by='grade', ascending=False)
 print_title('Top 3 rows sorted by grade')
-print(df)
+print(df.head(3))
 print()
 
 # --- NumPy ---
