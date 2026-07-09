@@ -151,8 +151,11 @@ def summary(df, score_by_region, msg, sig_var):
     logger.info(f'Top 3 regions by mean happiness score:\n {score_by_region.head(3)}')
     logger.info(f'Bottom 3 regions by mean happiness score:\n {score_by_region.tail(3)}')
     logger.info(f'Result of t-test pre/post-2020: {msg}')
-    strongest_var = sorted(sig_var, key=lambda x: abs(x[1]), reverse=True)[0]
-    logger.info(f'Variable most strongly correlated to Happiness score: {strongest_var[0]} with correlation coefficient {strongest_var[1]}')
+    if strongest_var:
+        strongest_var = sorted(sig_var, key=lambda x: abs(x[1]), reverse=True)[0]
+        logger.info(f'Variable most strongly correlated to Happiness score: {strongest_var[0]} with correlation coefficient {strongest_var[1]}')
+    else:
+        logger.info('No variable is significantly correlated to Happiness score after Bonferroni correction.')
 
 
 @flow
