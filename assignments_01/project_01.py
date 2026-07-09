@@ -27,7 +27,7 @@ def load_df():
         df['Year'] = year
         dfs.append(df)
     df = pd.concat(dfs)    
-    df.to_csv(OUTPUT_PATH + 'merged_happiness.csv')
+    df.to_csv(OUTPUT_PATH + 'merged_happiness.csv', index=False)
     logger.info(f'CSV successfully saved.')
     return df
 
@@ -153,7 +153,7 @@ def summary(df, score_by_region, msg, sig_var):
     logger.info(f'Result of t-test pre/post-2020: {msg}')
     if sig_var:
         strongest_var = sorted(sig_var, key=lambda x: abs(x[1]), reverse=True)[0]
-        logger.info(f'Variable most strongly correlated to Happiness score: {strongest_var[0]} with correlation coefficient {strongest_var[1]}')
+        logger.info(f'Variable most strongly correlated to Happiness score after Bonferroni correction: {strongest_var[0]} with correlation coefficient {strongest_var[1]}')
     else:
         logger.info('No variable is significantly correlated to Happiness score after Bonferroni correction.')
 
