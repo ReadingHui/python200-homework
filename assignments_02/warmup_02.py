@@ -20,10 +20,11 @@ salary = np.array([45000, 50000, 60000, 75000, 90000, 120000])
 
 model = LinearRegression()
 model.fit(years, salary)
-print(f'Salary prediction for 4 years experience: {model.predict(np.array(4).reshape(-1,1))}')
-print(f'Salary prediction for 8 years experience: {model.predict(np.array(8).reshape(-1,1))}')
 print(f'Slope of model: {model.coef_[0]}')
 print(f'Intercept of the model: {model.intercept_}')
+print(f'Salary prediction for 4 years experience: {model.predict([[4]])}')
+print(f'Salary prediction for 8 years experience: {model.predict([[8]])}')
+
 
 # Q2
 X = np.array([10, 20, 30, 40, 50])

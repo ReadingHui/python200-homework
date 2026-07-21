@@ -22,22 +22,23 @@ print()
 plt.hist(df['G3'], 21)
 plt.title('Distribution of Final Math Grades')
 plt.xlabel('G3')
-plt.xlabel('Frequency')
+plt.ylabel('Frequency')
 plt.savefig('assignments_02/outputs/g3_distribution.png')
 plt.close()
 
 # Task 2
+# Encoding the categorical data
+df[['schoolsup', 'internet', 'higher', 'activities']] = df[['schoolsup', 'internet', 'higher', 'activities']].replace({'yes': 1, 'no': 0})
+df['sex'] = df['sex'].replace({'M': 0, 'F': 1})
+print(df.head())
+
 # Filtering the G3=0 rows
 print(f'df shape before: {df.shape}')
 df_G3_0 = df[df['G3'] == 0]
 df_filtered = df[df['G3'] > 0]
 print(f'df shape after: {df_filtered.shape}')
 # Keeping the rows heavily skewed the data to an imaginery 0 point, which the students didn't actually get.
-
-# Encoding the categorical data
-df_filtered[['schoolsup', 'internet', 'higher', 'activities']] = df_filtered[['schoolsup', 'internet', 'higher', 'activities']].replace({'yes': 1, 'no': 0})
-df_filtered['sex'] = df_filtered['sex'].replace({'M': 0, 'F': 1})
-print(df_filtered.head())
+# G3 = 0 actually means the student did not take the final exam.
 
 # Correlation between `absences` and `G3`
 print(f'Original corr between `absence` and `G3`: {df['absences'].corr(df['G3'])}')
@@ -227,15 +228,14 @@ plt.close()
 
 # The size of the filtered dataset: (357, 18) and the test set: 72
 
-# The RMSE and R² of your best model in plain language -- on a 0-20 scale, what does a typical prediction error actually mean?
 # The RMSE is 2.855, the R^2 is 0.1539
-# The RMSE represents the error of the prediction is on average 3 grades.
+# The RMSE represents the error of the prediction is on average 3 grades, while the R^2 represents the % of the feature affects the variance of the grade.
 
-# Which two features have the largest positive and largest negative coefficients, and what those mean
 # Largest positive: internet, largest negative: schoolsup
 # This means having internet is the best boost to the predicted grade
 # and having schoolsup implies a largest negative boost to the predicted grade.
-# One result that surprised you:
+
+# Surprising result:
 # With school support, the G3 is actually lower, which could indicate students who are using school support are the ones who are weaker.
 
 # Neglected Feature: The Power of G1
