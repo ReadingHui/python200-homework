@@ -175,8 +175,8 @@ print(f'RMSE of the model: {round(rmse(y_test, y_pred), 4)}')
 print(f'R^2 of the model: {round(model.score(X_test, y_test), 4)}')
 print()
 
-# The slope represents on average how much grades from G3 is reduced with an extra failures in the past.
-# The RMSE represents the error of the prediction is on average 3 grades.
+# The slope represents on average, for each extra failure in the past, the grade will decrease by ~1.43
+# The RMSE represents the error of the prediction is on average 2.96 grades.
 # The R^2 is about the same as what I expected from the EDA, as the correlation coefficient is -0.3, the R^2 should be about 0.09.
 
 # Task 5: Build the Full Model
@@ -226,17 +226,13 @@ plt.close()
 # The model seem to struggle roughly uniform across the grades.
 # The point above diagonal means the model underestimated, below the diagronal means the model overestimated.
 
-# The size of the filtered dataset: (357, 18) and the test set: 72
+# The data set size was 357, while the test set contains 20% of it, which is 72. The RMSE is 2.855, the R^2 is 0.1539, 
+# which represents the error of the prediction is on average 2.855 grades, while the R^2 represents ~15% of the variance of the grade is captured by the selected features.
 
-# The RMSE is 2.855, the R^2 is 0.1539
-# The RMSE represents the error of the prediction is on average 3 grades, while the R^2 represents the % of the feature affects the variance of the grade.
+# The largest positive coefficient feature was internet, and the largest negative coefficient feature was schoolsup.
+# This means having internet is the best boost to the predicted grade and having schoolsup implies a largest negative boost to the predicted grade.
 
-# Largest positive: internet, largest negative: schoolsup
-# This means having internet is the best boost to the predicted grade
-# and having schoolsup implies a largest negative boost to the predicted grade.
-
-# Surprising result:
-# With school support, the G3 is actually lower, which could indicate students who are using school support are the ones who are weaker.
+# A surprising result from the analysis is with school support, the G3 is actually lower, which could indicate students who are using school support are the ones who are weaker.
 
 # Neglected Feature: The Power of G1
 feature_cols.append('G1')
