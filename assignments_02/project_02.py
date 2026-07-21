@@ -27,18 +27,18 @@ plt.savefig('assignments_02/outputs/g3_distribution.png')
 plt.close()
 
 # Task 2
-# Encoding the categorical data
-df[['schoolsup', 'internet', 'higher', 'activities']] = df[['schoolsup', 'internet', 'higher', 'activities']].replace({'yes': 1, 'no': 0})
-df['sex'] = df['sex'].replace({'M': 0, 'F': 1})
-print(df.head())
-
 # Filtering the G3=0 rows
 print(f'df shape before: {df.shape}')
 df_G3_0 = df[df['G3'] == 0]
 df_filtered = df[df['G3'] > 0]
 print(f'df shape after: {df_filtered.shape}')
-# Keeping the rows heavily skewed the data to an imaginery 0 point, which the students didn't actually get.
-# G3 = 0 actually means the student did not take the final exam.
+
+# Encoding the categorical data
+df_filtered[['schoolsup', 'internet', 'higher', 'activities']] = df_filtered[['schoolsup', 'internet', 'higher', 'activities']].replace({'yes': 1, 'no': 0})
+df_filtered['sex'] = df_filtered['sex'].replace({'M': 0, 'F': 1})
+print(df_filtered.head())
+# Keeping the rows heavily skewed the data to an imaginery 0 point, which is not the actual grade student got.
+# G3 = 0 actually means the student did not take the final exam, which distorts the relationship with absences.
 
 # Correlation between `absences` and `G3`
 print(f'Original corr between `absence` and `G3`: {df['absences'].corr(df['G3'])}')

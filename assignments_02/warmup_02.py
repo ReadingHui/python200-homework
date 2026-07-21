@@ -22,8 +22,8 @@ model = LinearRegression()
 model.fit(years, salary)
 print(f'Slope of model: {model.coef_[0]}')
 print(f'Intercept of the model: {model.intercept_}')
-print(f'Salary prediction for 4 years experience: {model.predict([[4]])}')
-print(f'Salary prediction for 8 years experience: {model.predict([[8]])}')
+print(f'Salary prediction for 4 years experience: {model.predict([[4]])[0]}')
+print(f'Salary prediction for 8 years experience: {model.predict([[8]])[0]}')
 
 
 # Q2
