@@ -32,8 +32,10 @@ X = X.reshape(-1, 1)
 print(f'New shape of X: {X.shape}')
 
 # Scikit-learn require X to be 2D for 2 main reasons, one is to avoid ambiguity.
-# Is a 1D array x features with 1 entry or 1 feature with x entries?
+# Is a 1D array n features with 1 entry or 1 feature with n entries?
 # Also, it makes the API more robust, the code can always assume the correct shape of the dataset instead of guessing and changing.
+# At the same time, X being 2D also aligns with how scikit-learn handles regression, it is always trying to do matrix multiplication,
+# where the features are represented by X, the feature Matrix, to multiply with other vectors.
 
 # Q3
 
@@ -46,7 +48,7 @@ print(f'Cluster point counts [first, second, third]: {np.bincount(labels)}')
 df = pd.DataFrame(X_clusters, columns=['x', 'y'])
 df['labels'] = labels
 
-sns.scatterplot(df, x='x', y='y', hue='labels')
+sns.scatterplot(df, x='x', y='y', hue='labels', palette='Set1')
 plt.scatter(kmeans.cluster_centers_[:,0], kmeans.cluster_centers_[:,1], color='black', marker='x', label='Cluster centers')
 plt.xlabel('x')
 plt.ylabel('y')

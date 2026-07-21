@@ -180,8 +180,7 @@ print()
 
 # Task 5: Build the Full Model
 
-feature_cols = ["failures", "Medu", "Fedu", "studytime", "higher", "schoolsup",
-                "internet", "sex", "freetime", "activities", "traveltime"]
+feature_cols = ['age', 'Medu', 'Fedu', 'traveltime', 'studytime', 'failures', 'absences', 'freetime', 'goout', 'Walc', 'schoolsup', 'internet', 'higher', 'activities', 'sex']
 X = df_filtered[feature_cols].values
 y = df_filtered["G3"].values
 
