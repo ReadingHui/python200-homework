@@ -47,7 +47,7 @@ print()
 
 # --- KNN ---
 # Q1
-knn_q1 = KNeighborsClassifier()
+knn_q1 = KNeighborsClassifier(n_neighbors=5)
 knn_q1.fit(X_train, y_train)
 y_pred = knn_q1.predict(X_test)
 print(f'Accuracy score of KNN: {knn_q1.score(X_test, y_test)}')
@@ -56,7 +56,7 @@ print(classification_report(y_test, y_pred, target_names=iris.target_names))
 print()
 
 # Q2
-knn = KNeighborsClassifier()
+knn = KNeighborsClassifier(n_neighbors=5)
 knn.fit(X_train_scaled, y_train)
 y_pred = knn.predict(X_test_scaled)
 print(f'Accuracy score of KNN: {knn.score(X_test_scaled, y_test)}')
@@ -69,8 +69,8 @@ print()
 # So scaling actually misclassify a data or two.
 
 # Q3
-knn = KNeighborsClassifier()
-cv = cross_val_score(knn, X, y)
+knn = KNeighborsClassifier(n_neighbors=5)
+cv = cross_val_score(knn, X_train, y_train, cv=5)
 print(f'Score of each fold: {cv}')
 print(f'Mean of scores: {cv.mean():.4f}')
 print(f'Standard Deviation of scores: {cv.std():.4f}')
@@ -80,7 +80,7 @@ print()
 # Q4
 for k in range(1, 16, 2):
     knn = KNeighborsClassifier(n_neighbors=k)
-    cv = cross_val_score(knn, X, y)
+    cv = cross_val_score(knn, X_train, y_train, cv=5)
     print(f'5-fold mean CV score for k={k} KNN model: {cv.mean():.4f}')
 print()
 # We can either choose k=7 or k=11 judging by the CV score, but k=7 should be chosen because of the simpler architecture
@@ -200,4 +200,3 @@ plt.tight_layout()
 plt.savefig('assignments_03/outputs/pca_reconstructions.png')
 plt.close()
 # At n=15, the digits start to sharpen and become clearly recognizable, which is approximately where the variance curve levels off (n ~ 12)
-
