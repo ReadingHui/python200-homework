@@ -14,14 +14,9 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import (
     confusion_matrix,
     ConfusionMatrixDisplay,
-    accuracy_score,
-    precision_score,
-    recall_score,
-    f1_score,
     classification_report
 )
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.inspection import DecisionBoundaryDisplay
 from sklearn.decomposition import PCA
 
 from sklearn.pipeline import Pipeline
@@ -114,9 +109,10 @@ print('Number of different spam_labels:')
 print(df['spam_label'].value_counts())
 print()
 # There are 4601 emails in the dataset.
-# The class are slightly imbalanced in a 60-40 split.
+# The class are slightly imbalanced in a 2788 spam / 60.6% vs 1813 ham / 39.4%.
 # With imbalanced dataset, accuracy high doesn't directly translate into a good prediction,
-# as blind guess could be >80% accurate if the classes are 80-20 split.
+# as blind guess could be 60.6% accurate without learning anything.
+# Hence, using F1-score is a better alternative as it balances both precision and recall as well.
 
 key_features = ['word_freq_free', 'char_freq_!', 'capital_run_length_total']
 for feature in key_features:
@@ -126,8 +122,9 @@ for feature in key_features:
     plt.ylabel('Spam Label')
     plt.savefig(f'assignments_03/outputs/{feature}_spam.png')
     plt.close()
-# For spam email, the frequency of `free` is much higher than that of non spam emails (almost 0)
-# The frequency of `!` and Capital run length are also significantly higher for spam emails
+# For spam email, the frequency of `free` is much higher, with median almost 0.2 and IQR > 0.6.
+# For ham email, the whole box is at 0, which means they akmost don't contain `free` except some outliers.
+# The median and IQR of the frequency of `!` and Capital run length are also significantly higher for spam emails, heavily skewed right.
 
 print('Data description (Full):')
 print(df.describe())
@@ -141,13 +138,11 @@ print('Data description (Ham):')
 print(df[df['spam_label'] == 0].describe())
 print()
 
-# The heavy skew toward zero tells me that the word and char frequency are chosen carefully,
-# those are the words that appears frequently in spam emails but not ham emails.
+# The heavy skew toward zero indicates sparsity, which in NLP, most words are absent due to the nature of language.
 # The numeric scale for word_freq are normally under 20, while the capital run length can go up to thousands.
-# This is cause by for a normally passage, word count should not exceed thousand, and among the words,
-# it is almost impossible for the same word to be used repeated extensively, otherwise the passage will not be readable.
-# However, for the capital count, it is counting characters instead of words, and full capitalized email are still readable.
-# This may affect the models which are sensitive to numeric scale, like regressions and deep learning models, scaling may have to be done.
+# This is because the word_freq are measured as percentage relative to total length; while for capital count, it is counting raw continuous characters,
+# which scales with email length and can easily reach hundreds or thousands.
+# This may affect the distance-based models which are sensitive to numeric scale, like regressions and deep learning models, scaling may have to be done.
 
 # Task 2: Prepare Your Data
 # Train-Test Split
@@ -166,7 +161,10 @@ print(f'X_test shape: {X_test.shape}')
 print(f'y_train shape: {y_train.shape}')
 print(f'y_test shape: {y_test.shape}')
 
-# Scaling by StandardScaler()
+# Scaling by StandardScaler() in order to bring the scale of the numeric features comparable.
+# Not using MinMaxScaler() because there are extreme values in features like capital_run_length,
+# MinMaxScaler() will squish most of the numbers to a very small value.
+# It is only fit on training set to prevent data leakage.
 scaler = StandardScaler()
 X_train_scaled = pd.DataFrame(
     scaler.fit_transform(X_train),
@@ -275,8 +273,7 @@ print(dt_top_10)
 rf_top_10 = pd.Series(X_train.columns[np.argsort(rf.feature_importances_)[-10:][::-1]])
 print('Top 10 most important features for Random Forest:')
 print(rf_top_10)
-# The two models agreed on 6 out of the 10 most important features, which mostly aligned with what I expect, like the
-# excessive use of capital letters and exclamation marks, as well as focusing on money.
+# The two models agreed on 6 out of the 10 most important features (60%), which mostly aligned with what I expect, like the excessive use of capital letters and exclamation marks to emphasize on urgency, as well as focusing on money for financial motivation.
 
 # Bar chart for RF
 plt.bar(X_train.columns, rf.feature_importances_)
@@ -299,17 +296,15 @@ lr_pca.fit(X_train_pca, y_train)
 print('=== Logistic Regression on PCA Data ===')
 model_report(lr_pca, X_test_pca, y_test)
 
-# The accuracy, precision, recall and f1-score are all slightly higher for plain Logistic Regression on scaled data instead of the PCA
-# which is expected. However, the difference is not too far off, so for performance sake, choosing PCA is a good option. 
+# The accuracy, precision, recall and f1-score are all slightly higher for plain Logistic Regression on scaled data instead of the PCA, which is expected as PCA discarded low variance components, albeit low, still exists. However, the difference is not too far off, so if computational efficiency or memory constraint are important, choosing PCA is a good option. 
 
-# In summary, the best performing model is the Random Forest with n_estimators=100. It has the highest metric across accuracy, precision, recall and f1-score.
-# The accuracy, precision, recall and f1-score are all slightly higher for scaled data instead of the PCA
-# which is expected. However, the difference is not too far off, so for performance sake, choosing PCA is a good option. 
+# In summary, the best performing model is the Random Forest with n_estimators=100. It has the highest metric across accuracy, precision, recall and f1-score at 0.94.
 
 # Pure accuracy is not the best metric to optimize in a spam classification task.
 # To me, I would like to minimize the false positives, as email is a daily conversation tool,
 # as well as business essentials. Any false positive can be devastating to a user or business.
 # Spam detection should just be a first line of defence, not completely filtering all possible emails.
+# Hence, Precision should be chosen for me.
 
 y_pred = rf.predict(X_test)
 cm = confusion_matrix(y_test, y_pred)
@@ -318,7 +313,7 @@ cmd.plot(cmap='coolwarm', text_kw={'color': 'black'})
 plt.savefig('assignments_03/outputs/best_model_confusion_matrix.png')
 plt.close()
 
-# With respect to the confusion matrix, the most error the model made was the false negative, which is what I would like to be.
+# With respect to the confusion matrix, the most error the model made was the false negative, which is what I would like to be, instead of false positive.
 
 # Task 4: Cross-Validation
 models = {
@@ -327,15 +322,17 @@ models = {
     'rf': RandomForestClassifier(n_estimators=100, random_state=42),
     'lr': LogisticRegression(C=1.0, max_iter=1000, solver='liblinear')
 }
+print('=== CV results on each classifiers ===')
 for name, model in models.items():
     if name in ['knn', 'lr']:
         cv = cross_val_score(model, X_train_scaled, y_train, cv=5)
     else:
         cv = cross_val_score(model, X_train, y_train, cv=5)
-    print(f'Mean of {name}: {cv.mean():.4f}; Std of {name}: {cv.std():.4f}')
-
-# Most accurate model is RandomForest with 0.9541 mean accuracy at highest, 
-# while KNN is the most stable, with std lowest at 0.0094. The ranking is the same with just basic train-test split.
+    print(f"{f'Mean of {name}: ':<15}{f'{cv.mean():.4f};\t':>11}{f'Std of {name}: ':<15}{f'{cv.std():.4f}':>7}")
+print()
+# Most accurate model is RandomForest with highest overall performance with a mean cv accuracy of 0.9541. 
+# Most stable model is KNN with lowest standard deviation at 0.0094. 
+# The ranking is the same with just basic train-test split, which means it is not just a lucky/unlucky train-test split.
 
 # Task 5: Building a Prediction Pipeline
 
@@ -358,15 +355,22 @@ non_tree_pipeline = Pipeline(
         ('classifier', LogisticRegression(C=1.0, max_iter=1000, solver='liblinear'))
     ]
 )
+# PCA was not included as it didn't improve the model performance in Task 3
 non_tree_pipeline.fit(X_train, y_train)
 y_pred = non_tree_pipeline.predict(X_test)
 print('Classification report of the best non-tree model:')
 print(classification_report(y_test, y_pred))
 print()
 
-# The pipeline of non-tree has the additional scaler to the tree pipeline.
+
+# The pipeline of non-tree model has the additional scaler to the tree pipeline.
 # That is because tree-based models are not sensitive to numeric range, 
 # so it is not necessary to scale the input or perform PCA on it.
+
+# The pipeline of the non-tree model also didn't have the PCA, as per previous discussion,
+# the models perform better without PCA, and with a simple model and small dataset like this,
+# model without PCA doesn't improve efficiency a lot.
+
 # Packaging a model this way provides a more clear structure on how the pipeline is built,
 # as well as easier to maintain when we want to change a part of the flow.
 # This increases stability when handing off to someone else or deploying it,

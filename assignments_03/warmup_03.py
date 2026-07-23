@@ -10,7 +10,6 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.metrics import (
-    accuracy_score,
     classification_report,
     confusion_matrix,
     ConfusionMatrixDisplay
@@ -133,12 +132,11 @@ images   = digits.images  # same data shaped as 8x8 images for plotting
 print(f'Shape of X_digits: {X_digits.shape}')
 print(f'Shape of images: {images.shape}')
 
-np.random.seed(42)
-random_indices = [
-    np.random.choice(np.where(y_digits == i)[0]) 
+indices = [
+    np.where(y_digits == i)[0][0]
     for i in range(10)
 ]
-example_images = images[random_indices]
+example_images = images[indices]
 
 _, axes = plt.subplots(1, 10)
 for i in range(10):
@@ -151,7 +149,7 @@ plt.close()
 
 # Q2
 pca = PCA()
-pca.fit(X_digits, y_digits)
+pca.fit(X_digits)
 scores = pca.transform(X_digits)
 
 scatter = plt.scatter(scores[:, 0], scores[:, 1], c=y_digits, cmap='tab10', s=10)  # c = color array
@@ -180,19 +178,24 @@ def reconstruct_digit(sample_idx, scores, pca, n_components):
 
 
 fig, axes = plt.subplots(5, 5)
+
+# Original digits
+for idx in range(5):
+    axes[0, idx].imshow(images[idx], cmap='gray_r')
+    axes[0][idx].axis('off')
+    axes[0][idx].set_title(f'Digit {idx}')
+axes[0][0].text(-0.25, 0.5, 'Original', transform=axes[0][0].transAxes,
+                        va='center', ha='right')
+
+# Row 1 to 4
 n_components = [2, 5, 15, 40]
-for row, n in enumerate(['Original'] + n_components):
+for row, n in enumerate(n_components):
     for idx in range(5):
-        if row == 0:
-            axes[row][idx].imshow(images[idx], cmap='gray_r')
-            axes[row][idx].axis('off')
-            axes[row][idx].set_title(f'{idx}')
-        else:
-            reconstructed_im = reconstruct_digit(idx, scores, pca, n)
-            axes[row][idx].imshow(reconstructed_im, cmap='gray_r')
-            axes[row][idx].axis('off')
+        reconstructed_im = reconstruct_digit(idx, scores, pca, n)
+        axes[row + 1][idx].imshow(reconstructed_im, cmap='gray_r')
+        axes[row + 1][idx].axis('off')
         if idx == 0:
-            axes[row][idx].text(-0.25, 0.5, f'{n}', transform=axes[row][idx].transAxes,
+            axes[row + 1][idx].text(-0.25, 0.5, f'{n}', transform=axes[row + 1][idx].transAxes,
                         va='center', ha='right')
 fig.supylabel('Number of Components')
 fig.suptitle('Digit Index')
