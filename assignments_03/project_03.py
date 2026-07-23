@@ -308,7 +308,7 @@ model_report(lr_pca, X_test_pca, y_test)
 
 y_pred = rf.predict(X_test)
 cm = confusion_matrix(y_test, y_pred)
-cmd = ConfusionMatrixDisplay(cm)
+cmd = ConfusionMatrixDisplay(cm, display_labels=['Ham', 'Spam'])
 cmd.plot(cmap='coolwarm', text_kw={'color': 'black'})
 plt.savefig('assignments_03/outputs/best_model_confusion_matrix.png')
 plt.close()
