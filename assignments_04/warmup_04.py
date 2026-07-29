@@ -67,7 +67,7 @@ ax.plot([0, 1], [0, 1], linestyle="--", color="gray", label="Random classifier")
 ax.set_title("ROC Curve — Classifiers")
 ax.legend()
 plt.tight_layout()
-plt.savefig("assignments_04/outputs/roc_comparison.png")
+plt.savefig("outputs/roc_comparison.png")
 plt.close()
 
 # At the point on each curve where TPR = 0.80, kNN has a much lower FPR. 
@@ -79,17 +79,17 @@ fpr, tpr, thresholds = roc_curve(y_test, y_probs_lr[:, 1])
 best_score = 0
 best_fpr, best_tpr, best_threshold = fpr[0], tpr[0], thresholds[0]
 for fpr, tpr, threshold in zip(fpr, tpr, thresholds):
-    y_pred = (y_probs_lr[:, 1] > threshold).astype(int)
+    y_pred = (y_probs_lr[:, 1] >= threshold).astype(int)
     score = f1_score(y_test, y_pred)
     if score > best_score:
         best_score = score
         best_fpr = fpr
         best_tpr = tpr
         best_threshold = threshold
-print(f'{'Optimal threshold: ':<20}{best_threshold:>5.4f}')
-print(f'{'Optimal TPR: ':<20}{best_tpr:>5.4f}')
-print(f'{'Optimal FPR: ':<20}{best_fpr:>5.4f}')
-print(f'{'Optimal f1: ':<20}{best_score:>5.4f}')
+print(f'Optimal threshold:      {best_threshold:.4f}')
+print(f'Optimal TPR:            {best_tpr:.4f}')
+print(f'Optimal FPR:            {best_fpr:.4f}')
+print(f'Optimal f1:             {best_score:.4f}')
 
 # This optimal threshold is much lower than the default 0.5.
 # In real application, we may choose a threshold lower than 0.5 if 0.5 threshold
@@ -180,9 +180,9 @@ print(cv_results.sort_values(by='Mean Score', ascending=False))
 # --- joblib ---
 # Q1
 best_lr_pipe = grid_search_lr.best_estimator_
-joblib.dump(best_lr_pipe, 'assignments_04/models/warmup_mode.pkl')
+joblib.dump(best_lr_pipe, 'models/warmup_model.pkl')
 
-loaded_clf = joblib.load('assignments_04/models/warmup_mode.pkl')
+loaded_clf = joblib.load('models/warmup_model.pkl')
 
 original_preds = best_lr_pipe.predict(X_test)
 loaded_preds = loaded_clf.predict(X_test)
@@ -198,7 +198,7 @@ new_samples = np.array([
 ])
 # --- Simulated prediction script ---
 def prediction(samples):
-    loaded_clf = joblib.load('assignments_04/models/warmup_mode.pkl')
+    loaded_clf = joblib.load('models/warmup_model.pkl')
     pred = loaded_clf.predict(samples)
     proba = loaded_clf.predict_proba(samples)[:, 1].round(4)
     return pd.DataFrame({
@@ -208,9 +208,10 @@ def prediction(samples):
 print('Predicted class and probability:')
 print(prediction(new_samples))
 
-# As the logistic regression formula is given by P(z) = 1 / (1 + e^(-z)), with all entries to be zero, the z reduces to the intercept b.
-# That makes the prob = 1 / (1 + e^(-b)). Now since the dataset is generated using make_dataset, the distribution of classes should be 
-# balanced, which makes b close to zero. Hence, the probability will be very close to 0.5, the only differentiating point is whether b
+# Since the dataset is generated using make_dataset, the mean of the features should be close to 0, which means the all-zero column after the
+# StandardScaler() should also be close to 0. As the logistic regression formula is given by P(z) = 1 / (1 + e^(-z)), with all entries to be zero, 
+# the z reduces to the intercept b. That makes the prob = 1 / (1 + e^(-b)). Now, the distribution of classes should be balanced because of make_dataset,
+# which makes b close to zero. Hence, the probability will be very close to 0.5, the only differentiating point is whether b
 # is positive or negative, which is not possible to predict unless we check the coeffient of the model directly.
-print(f'Constant in the Logistic Regression: {loaded_clf["clf"].coef_[0][-1]:.4f}')
+print(f'Constant in the Logistic Regression: {loaded_clf["clf"].intercept_[0]:.4f}')
 # Since the constant term is positive, the probability will be >0.5, hence it should be class 1, which matches.
