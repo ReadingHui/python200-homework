@@ -37,8 +37,11 @@ print()
 
 X_test = test_cases[FEATURES]
 y_test = test_cases['good']
-print(f"Predictions: {model.predict(X_test)}")
-print(f"Prediction probabilities: {model.predict_proba(X_test)[:, 1].round(2)}")
+y_pred = model.predict(X_test)
+y_proba = model.predict_proba(X_test)[:, 1].round(2)
+test_cases['Prediction'] = y_pred
+test_cases['Probability for good'] = y_proba
+print(test_cases)
 
 # For the borderline cases, the model is really confident on id #3 (P = 0.0), but it is incorrect. It is not so confident on id #7 (P = 0.56), which is also incorrect.
 # The model is correct on the other borderline cases, but not too sure on id #4, 5 as well (P = 0.27, 0.31). With a day where the model says 0.52, I will probably mark

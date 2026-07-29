@@ -187,7 +187,7 @@ loaded_clf = joblib.load('models/warmup_model.pkl')
 original_preds = best_lr_pipe.predict(X_test)
 loaded_preds = loaded_clf.predict(X_test)
 
-assert (original_preds == loaded_preds).all(), "predictions do not match!"
+assert (original_preds == loaded_preds).all(), "Predictions do not match!"
 print("Predictions match. Model saved and loaded successfully.")
 
 # Q2
