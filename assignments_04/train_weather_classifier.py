@@ -37,11 +37,14 @@ print()
 # Step 2: Engineer Labels
 def good_range(row):
     return int(
-        (18 <= row["temperature_2m_max"] <= 30) and # In LA, temperature drops quick unless it is in heat wave, so even the highest temp is 30C, it is still comfortable in the morning or evening to run.
-        (row["temperature_2m_min"] >= 10) and # Minimum of 0C or Maximum of 7C is too cold to run in LA, 10C as lowest means morning and evening should have a temperature of 15C+, which is more comfortable
+        (18 <= row["temperature_2m_max"] <= 30) and 
+        (row["temperature_2m_min"] >= 10) and 
         (row["precipitation_sum"] < 3.0) and
         (row["wind_speed_10m_max"] < 30)
     )
+    # In LA, temperature drops quick unless it is in heat wave, so even the highest temp is 30C, it is still comfortable in the morning or evening to run.
+    # Minimum of 0C or Maximum of 7C is too cold to run in LA, 10C as lowest and 18C as minimum highest means morning and evening should have a temperature of 15C+, which is more comfortable.
+    # Hence, the threshold are changed to fit my personal preference and local climate more.
 
 df['good'] = df.apply(good_range, axis=1)
 print('Good/Bad day count:')
@@ -130,16 +133,16 @@ metadata = {
     'features': FEATURES,
     'best_params': grid_search.best_params_,
     'test_auc': round(test_auc, 4),
-    'city': {
-        "name": "Los Angeles", 
-        "coord": (34.0522, -118.2437)
-        },
+    'city_name': "Los Angeles",
+    "latitude": 34.0522, 
+    "longitude": -118.2437,
     "label_thresholds": {
         "temperature_2m_max": "18–30°C",
         "temperature_2m_min": ">= 10°C",
         "precipitation_sum":  "< 3.0 mm",
         "wind_speed_10m_max": "< 30 km/h",
     },
+    "label_threshold_description": "Adjusted from the starter thresholds to better match the warmer climate in Los Angeles and my comfort level for running."
 }
 with open("models/weather_classifier_metadata.json", "w") as f:
     json.dump(metadata, f, indent=2)

@@ -2,13 +2,6 @@ import joblib
 import json
 import pandas as pd
 
-FEATURES = [
-    "temperature_2m_max",
-    "temperature_2m_min",
-    "precipitation_sum",
-    "wind_speed_10m_max",
-]
-
 model = joblib.load("models/weather_classifier.pkl")
 with open("models/weather_classifier_metadata.json", "r") as f:
     metadata = json.load(f)
@@ -35,13 +28,21 @@ print('Test cases:')
 print(test_cases)
 print()
 
-X_test = test_cases[FEATURES]
+X_test = test_cases[metadata['features']]
 y_test = test_cases['good']
 y_pred = model.predict(X_test)
 y_proba = model.predict_proba(X_test)[:, 1].round(2)
 test_cases['Prediction'] = y_pred
 test_cases['Probability for good'] = y_proba
-print(test_cases)
+for index, row in test_cases.iterrows():
+    print(f"Day {index + 1}: ")
+    print_msg = ""
+    for col in test_cases.columns:
+        if col != 'good':
+            print_msg += f"{col}: {row[col]}\t"
+    print(print_msg)
+
+# --- Reflection ---
 
 # For the borderline cases, the model is really confident on id #3 (P = 0.0), but it is incorrect. It is not so confident on id #7 (P = 0.56), which is also incorrect.
 # The model is correct on the other borderline cases, but not too sure on id #4, 5 as well (P = 0.27, 0.31). With a day where the model says 0.52, I will probably mark
