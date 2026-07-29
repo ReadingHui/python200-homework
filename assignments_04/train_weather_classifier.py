@@ -36,15 +36,16 @@ print()
 
 # Step 2: Engineer Labels
 def good_range(row):
+    # In LA, temperature drops quick unless it is in heat wave, so even the highest temp is 30C, it is still comfortable in the morning or evening to run.
+    # Minimum of 0C or Maximum of 7C is too cold to run in LA, 10C as lowest and 18C as minimum highest means morning and evening should have a temperature of 15C+, which is more comfortable.
+    # Hence, the threshold are changed to fit my personal preference and local climate more.
     return int(
         (18 <= row["temperature_2m_max"] <= 30) and 
         (row["temperature_2m_min"] >= 10) and 
         (row["precipitation_sum"] < 3.0) and
         (row["wind_speed_10m_max"] < 30)
     )
-    # In LA, temperature drops quick unless it is in heat wave, so even the highest temp is 30C, it is still comfortable in the morning or evening to run.
-    # Minimum of 0C or Maximum of 7C is too cold to run in LA, 10C as lowest and 18C as minimum highest means morning and evening should have a temperature of 15C+, which is more comfortable.
-    # Hence, the threshold are changed to fit my personal preference and local climate more.
+
 
 df['good'] = df.apply(good_range, axis=1)
 print('Good/Bad day count:')
