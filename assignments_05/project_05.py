@@ -21,11 +21,21 @@ def get_completion(messages, model="gpt-4o-mini", temperature=0.7, usage=False):
     else:
         return response.choices[0].message.content, response.usage.total_tokens
 
-YOUR_SYSTEM_PROMPT = "You are a job application coach, you will be helping the user to in every step to land their dream job. " \
-"You will be focusing on the job application materials, including but not limited to review and modify resume, cover letter, and providing job hunting advices." \
-"Be specific to the target job domain, do not produce general outputs." \
-"Always remind the user to review and edit your output before any submissions." \
-"Remind users that you may not know the user's specific industry norms, and they should use their own judgment."
+YOUR_SYSTEM_PROMPT = """
+                    You are an expert Job Application Coach specializing in tailored career strategy, material optimization, and high-impact application advice. Your primary goal is to help the user land their desired role by making every application as targeted and competitive as possible.
+
+                    ### Core Role & Responsibilities
+                    1. **Targeted Material Optimization:** Review and rewrite resumes, cover letters, and LinkedIn profiles specifically aligned with the target job description and industry. Never generate generic, surface-level content.
+                    2. **Strategic Alignment:** Extract key skills, tools, and keywords from target job postings and map the user's experience to those requirements using strong, metrics-driven action verbs (e.g., STAR method).
+                    3. **Actionable Coaching:** Provide sharp, actionable advice on job hunting, networking, and interviewing tailored to the user's specific domain.
+
+                    ### Behavioral Rules & Constraints
+                    * **Enforce Domain Context:** If the user has not provided a specific target job title, job description, or industry context, **pause and ask for it** before generating optimized materials.
+                    * **Avoid Generalities:** Every critique, suggestion, or text output must directly tie back to the target role's expectations. Avoid standard fluff or filler phrases.
+                    * **Standard Disclaimers (Required):**
+                    - Always remind the user that AI may not fully capture hyper-specific industry norms or internal company cultures, and they should apply their own professional judgment.
+                    - End strategic revisions by instructing the user to thoroughly review, edit, and verify all output before submitting their application.                    
+                    """
 
 # I included some examples of the job the bot may face, to give concrete idea of what it should focus on.
 # Also, I added the instruction for the bot to be domain specific in the job, as only domain specific advices and resume can help user actually get an edge.
@@ -67,7 +77,14 @@ bullets = [
 ]
 
 print("=== Task 2 ===")
-print(rewrite_bullets(bullets))
+rewrote_bullets = rewrite_bullets(bullets)
+if isinstance(rewrote_bullets, dict):
+    print(f"Original: {rewrote_bullets['original']:<50}" | rewrote_bullets['improved'])
+elif isinstance(rewrote_bullets, list):
+    for bullet in rewrote_bullets:
+        print(f"Original: {bullet['original']:<50} | Improved: {bullet['improved']}")
+else:
+    print("Unexpected type of the output.")
 print()
 
 # Question: What makes these bullets weak, and what kinds of changes did the model suggest?
@@ -112,7 +129,7 @@ def generate_cover_letter(job_title: str, background: str, usage=False) -> str:
     messages = [{"role": "user", "content": prompt}]
     # Your code here: call get_completion() and return the result
     response = get_completion(messages, usage=usage)
-    print(response)
+    return response
 
 job_title = "Junior Data Engineer"
 background = "Five years of experience as a middle school math teacher; recently completed \
@@ -139,7 +156,8 @@ def is_safe(text: str) -> bool:
     # Your code here: return True if safe, False if flagged, and print a message if flagged
     if flagged:
         result_cats = result.results[0].categories.model_dump()
-        print(f"Flagged categories: {[cat for cat in result_cats if result_cats[cat]]}")
+        flagged_cats = [cat for cat in result_cats if result_cats[cat]]
+        print(f"Unfortunately, your message has been flagged in {flagged_cats} by the moderator, please rephrase your input.")
         return False
     else:
         return True
@@ -203,8 +221,18 @@ def run_chatbot():
                 if line:
                     raw_bullets.append(line)
             # YOUR CODE: call rewrite_bullets() and print the results
-            rewrote_bullet, token_usage = rewrite_bullets(raw_bullets, usage=True)
-            print(rewrote_bullet)
+            rewrote_bullets, token_usage = rewrite_bullets(raw_bullets, usage=True)
+            if isinstance(rewrote_bullets, dict):
+                print(f"Original: {rewrote_bullets['original']:<50}" | rewrote_bullets['improved'])
+            elif isinstance(rewrote_bullets, list):
+                for bullet in rewrote_bullets:
+                    print(f"Original: {bullet['original']:<50} | Improved: {bullet['improved']}")
+            else:
+                print("Unexpected type of the output.")
+            messages.append({
+                "role": "assistant",
+                "content": rewrote_bullets
+            })
 
         # 6. Check if the user wants a cover letter
         elif "cover letter" in user_input.lower():
@@ -213,6 +241,10 @@ def run_chatbot():
             # YOUR CODE: call generate_cover_letter() and print the result
             cover_letter, token_usage = generate_cover_letter(job_title, background, usage=True)
             print(cover_letter)
+            messages.append({
+                "role": "assistant",
+                "content": cover_letter
+            })
 
         # 7. Otherwise, handle it as a regular chat turn
         else:

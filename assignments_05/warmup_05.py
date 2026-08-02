@@ -331,7 +331,7 @@ print("Open AI response:")
 print(response)
 print()
 
-# Ollama's response:
+# Ollama's output:
 # A large language model is an AI system designed to understand and generate human language, trained on vast
 # datasets to learn patterns and improve accuracy over time. It can comprehend complex contexts, understand context,
 # and produce coherent text, making it versatile for tasks like writing, translation, and content creation.
