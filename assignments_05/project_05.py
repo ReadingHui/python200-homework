@@ -194,6 +194,7 @@ def run_chatbot():
 
     while True:
         user_input = input("You: ").strip()
+        token_usage = 0
 
         # 2. Handle exit
         if user_input.lower() in {"quit", "exit"}:
@@ -229,10 +230,6 @@ def run_chatbot():
                     print(f"Original: {bullet['original']:<50} | Improved: {bullet['improved']}")
             else:
                 print("Unexpected type of the output.")
-            messages.append({
-                "role": "assistant",
-                "content": rewrote_bullets
-            })
 
         # 6. Check if the user wants a cover letter
         elif "cover letter" in user_input.lower():
@@ -241,10 +238,6 @@ def run_chatbot():
             # YOUR CODE: call generate_cover_letter() and print the result
             cover_letter, token_usage = generate_cover_letter(job_title, background, usage=True)
             print(cover_letter)
-            messages.append({
-                "role": "assistant",
-                "content": cover_letter
-            })
 
         # 7. Otherwise, handle it as a regular chat turn
         else:
