@@ -62,9 +62,15 @@ def rewrite_bullets(bullets: list[str], usage=False) -> list[dict]:
     messages = [{"role": "user", "content": prompt}]
     # Your code here: call get_completion(), parse the JSON, and return the result
     response = get_completion(messages, usage=usage)
+    if usage:
+        response, token_usage = response
+        
     try:
         result = json.loads(response)
-        return result
+        if usage:
+            return result, token_usage
+        else:
+            return result
     except json.JSONDecodeError:
         print(f"Not a valid JSON format, raw response: {response}")
     except KeyError:
@@ -79,10 +85,12 @@ bullets = [
 print("=== Task 2 ===")
 rewrote_bullets = rewrite_bullets(bullets)
 if isinstance(rewrote_bullets, dict):
-    print(f"Original: {rewrote_bullets['original']:<50}" | rewrote_bullets['improved'])
+    ori_len = len(rewrote_bullets['original'])
+    print(f"{'Original: ' + rewrote_bullets['original']:<{ori_len + 12}} | Improved: {rewrote_bullets['improved']}")
 elif isinstance(rewrote_bullets, list):
+    max_len = max([len(b) for b in bullets])
     for bullet in rewrote_bullets:
-        print(f"Original: {bullet['original']:<50} | Improved: {bullet['improved']}")
+        print(f"{'Original: ' + bullet['original']:<{max_len + 12}} | Improved: {bullet['improved']}")
 else:
     print("Unexpected type of the output.")
 print()
@@ -157,7 +165,7 @@ def is_safe(text: str) -> bool:
     if flagged:
         result_cats = result.results[0].categories.model_dump()
         flagged_cats = [cat for cat in result_cats if result_cats[cat]]
-        print(f"Unfortunately, your message has been flagged in {flagged_cats} by the moderator, please rephrase your input.")
+        print(f"Flagged as {flagged_cats}, please rephrase your input.")
         return False
     else:
         return True

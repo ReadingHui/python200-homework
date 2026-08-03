@@ -168,7 +168,7 @@ def fetch_response(message, model="gpt-4o-mini", sys_message=None):
     return response_txt
 
 # Prompt Q1 - Zero-shot
-print("=== Prompt Q1 ===")
+print("=== Prompt Q1 - Zero-shot ===")
 reviews = [
     "The onboarding process was smooth and the team was welcoming.",
     "The software crashes constantly and support never responds.",
@@ -186,7 +186,7 @@ for i, review in enumerate(reviews):
 print()
 
 # Prompt Q2 - One-Shot
-print("=== Prompt Q2 ===")
+print("=== Prompt Q2 - One-shot ===")
 example = """
         Example:
         Review: "Fast shipping but the item arrived damaged."
@@ -207,7 +207,7 @@ print()
 # but for Q2, it followed the format given in the example.
 
 # Prompt Q3 - Few-Shot
-print("=== Prompt Q3 ===")
+print("=== Prompt Q3 - Few-shot ===")
 example = """
         Example 1:
         Review: "The sunny afternoon breeze made our walk along the coast feel completely effortless."
@@ -318,6 +318,7 @@ response = fetch_response(
 )
 print("Response 2 (expect to return \"No steps provided.\")")
 print(response)
+assert response == "No steps provided"
 print()
 
 # --- Local Models with Ollama ---
@@ -332,12 +333,24 @@ print(response)
 print()
 
 # Ollama's output:
-# A large language model is an AI system designed to understand and generate human language, trained on vast
-# datasets to learn patterns and improve accuracy over time. It can comprehend complex contexts, understand context,
-# and produce coherent text, making it versatile for tasks like writing, translation, and content creation.
+# Thinking...
+# Okay, the user wants me to explain a large language model in two sentences. Let me start by recalling what I know.
+# A large language model is a type of AI model that can understand and generate human language. It's trained on a
+# lot of text data, so it's very powerful.
+
+# First sentence: Maybe start by stating that it's a model that can understand and generate natural language. Second
+# sentence: Emphasize that it's trained on vast amounts of text, allowing it to learn from a lot of data. Wait, but
+# I need to make sure it's two sentences. Let me check again. Yes, that's two sentences. Need to be concise and
+# accurate. Also, mention the training data and the capabilities like generating text. Alright, that should work.
+# ...done thinking.
+
+# A large language model is an AI model designed to understand and generate human language, trained on vast amounts
+# of text data to learn patterns and improve its performance over time. It can comprehend complex sentences,
+# understand context, and produce coherent text, making it highly versatile in various applications.
+
 
 # Question: What differences did you notice between the two responses? What is one advantage and one disadvantage of running a model locally?
 # Answer: The two responses are similar, OpenAI's response is shorter and more concise, with a splash of technical jardon in "neural networks" and "deep learning".
 # The Ollama response is more general, without any technical jardon. An advantage of running a model locally is more privacy, there is no linkage to the internet,
 # and you don't have to worry about your data being used in training. However, a disadvantage is it doesn't get updated, the info it has is fixed, it also cannot
-# search the internet for new information.
+# search the internet for new information. Also, the Ollama response included the thinking process, which is not included in the OpenAI API call.
