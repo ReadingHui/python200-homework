@@ -232,10 +232,12 @@ def run_chatbot():
             # YOUR CODE: call rewrite_bullets() and print the results
             rewrote_bullets, token_usage = rewrite_bullets(raw_bullets, usage=True)
             if isinstance(rewrote_bullets, dict):
-                print(f"Original: {rewrote_bullets['original']:<50}" | rewrote_bullets['improved'])
+                ori_len = len(rewrote_bullets['original'])
+                print(f"{'Original: ' + rewrote_bullets['original']:<{ori_len + 12}} | Improved: {rewrote_bullets['improved']}")
             elif isinstance(rewrote_bullets, list):
+                max_len = max([len(b) for b in raw_bullets])
                 for bullet in rewrote_bullets:
-                    print(f"Original: {bullet['original']:<50} | Improved: {bullet['improved']}")
+                    print(f"{'Original: ' + bullet['original']:<{max_len + 12}} | Improved: {bullet['improved']}")
             else:
                 print("Unexpected type of the output.")
 

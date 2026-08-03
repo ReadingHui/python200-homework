@@ -318,7 +318,7 @@ response = fetch_response(
 )
 print("Response 2 (expect to return \"No steps provided.\")")
 print(response)
-assert response == "No steps provided"
+assert response == "No steps provided."
 print()
 
 # --- Local Models with Ollama ---
