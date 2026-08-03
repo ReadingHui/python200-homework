@@ -9,17 +9,14 @@ TOKEN_THRESHOLD = 2000
 load_dotenv()
 client = OpenAI()
 
-def get_completion(messages, model="gpt-4o-mini", temperature=0.7, usage=False):
+def get_completion(messages, model="gpt-4o-mini", temperature=0.7):
     response = client.chat.completions.create(
         model=model,
         messages=messages,
         temperature=temperature,
         max_completion_tokens=400
     )
-    if not usage:
-        return response.choices[0].message.content
-    else:
-        return response.choices[0].message.content, response.usage.total_tokens
+    return response.choices[0].message.content, response.usage.total_tokens
 
 YOUR_SYSTEM_PROMPT = """
                     You are an expert Job Application Coach specializing in tailored career strategy, material optimization, and high-impact application advice. Your primary goal is to help the user land their desired role by making every application as targeted and competitive as possible.
@@ -41,7 +38,7 @@ YOUR_SYSTEM_PROMPT = """
 # Also, I added the instruction for the bot to be domain specific in the job, as only domain specific advices and resume can help user actually get an edge.
 
 # --- Task 2: Bullet Point Rewriter ---
-def rewrite_bullets(bullets: list[str], usage=False) -> list[dict]:
+def rewrite_bullets(bullets: list[str]) -> list[dict]:
     # Format the bullets into a delimited block
     bullet_text = "\n".join(f"- {b}" for b in bullets)
 
@@ -61,16 +58,10 @@ def rewrite_bullets(bullets: list[str], usage=False) -> list[dict]:
 
     messages = [{"role": "user", "content": prompt}]
     # Your code here: call get_completion(), parse the JSON, and return the result
-    response = get_completion(messages, usage=usage)
-    if usage:
-        response, token_usage = response
-        
+    response, token_usage = get_completion(messages)        
     try:
         result = json.loads(response)
-        if usage:
-            return result, token_usage
-        else:
-            return result
+        return result, token_usage
     except json.JSONDecodeError:
         print(f"Not a valid JSON format, raw response: {response}")
     except KeyError:
@@ -83,7 +74,7 @@ bullets = [
 ]
 
 print("=== Task 2 ===")
-rewrote_bullets = rewrite_bullets(bullets)
+rewrote_bullets, _ = rewrite_bullets(bullets)
 if isinstance(rewrote_bullets, dict):
     ori_len = len(rewrote_bullets['original'])
     print(f"{'Original: ' + rewrote_bullets['original']:<{ori_len + 12}} | Improved: {rewrote_bullets['improved']}")
@@ -102,7 +93,7 @@ print()
 
 # --- Task 3: Cover Letter Generator ---
 
-def generate_cover_letter(job_title: str, background: str, usage=False) -> str:
+def generate_cover_letter(job_title: str, background: str) -> str:
     prompt = f"""
     You write strong cover letter opening paragraphs for career changers.
     The paragraph should be 3-5 sentences: confident, specific, and free of clichés.
@@ -136,15 +127,15 @@ def generate_cover_letter(job_title: str, background: str, usage=False) -> str:
 
     messages = [{"role": "user", "content": prompt}]
     # Your code here: call get_completion() and return the result
-    response = get_completion(messages, usage=usage)
-    return response
+    response, token_usage = get_completion(messages)
+    return response, token_usage
 
 job_title = "Junior Data Engineer"
 background = "Five years of experience as a middle school math teacher; recently completed \
 a Python course and built data pipelines using Prefect and Pandas."
 
 print('=== Task 3 ===')
-print(generate_cover_letter(job_title, background))
+print(generate_cover_letter(job_title, background)[0])
 print()
 
 # Question: Why did you choose those particular examples? What does the few-shot pattern help control in the output?
@@ -230,7 +221,7 @@ def run_chatbot():
                 if line:
                     raw_bullets.append(line)
             # YOUR CODE: call rewrite_bullets() and print the results
-            rewrote_bullets, token_usage = rewrite_bullets(raw_bullets, usage=True)
+            rewrote_bullets, token_usage = rewrite_bullets(raw_bullets)
             if isinstance(rewrote_bullets, dict):
                 ori_len = len(rewrote_bullets['original'])
                 print(f"{'Original: ' + rewrote_bullets['original']:<{ori_len + 12}} | Improved: {rewrote_bullets['improved']}")
@@ -246,7 +237,7 @@ def run_chatbot():
             job_title = input("Job Application Helper: What is the job title? ").strip()
             background = input("Job Application Helper: Briefly describe your background: ").strip()
             # YOUR CODE: call generate_cover_letter() and print the result
-            cover_letter, token_usage = generate_cover_letter(job_title, background, usage=True)
+            cover_letter, token_usage = generate_cover_letter(job_title, background)
             print(cover_letter)
 
         # 7. Otherwise, handle it as a regular chat turn
@@ -258,7 +249,7 @@ def run_chatbot():
                             "content": user_input
                         })
             # - Call get_completion(messages)
-            reply, token_usage = get_completion(messages, usage=True)
+            reply, token_usage = get_completion(messages)
             # - Print the reply
             print(f"Job Application Helper: {reply}")
             # - Append the reply to `messages` as an assistant message
