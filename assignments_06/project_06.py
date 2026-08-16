@@ -103,4 +103,4 @@ for i, s in enumerate(source_nodes):
 # Q: What is one failure mode that RAG cannot fully prevent, even when retrieval is working correctly?
 # A: Hallucination. With all the pre-training on known data, the model usually adapted a professional and confident tone when generating the responses. This stays even when they don't actually know the 
 #    correct answer (both from the document and pre-trained data). At its root, an LLM is just a word chain generator, it tries to predict the most probable word token that appears next. Hence, it will
-#    certainly hallucinate and give a confident tone on an incorrect answer.
+#    certainly hallucinate and give a confident tone on an incorrect answer even when the retrieval is correct, as there may not be enough information in the document to answer the prompt.

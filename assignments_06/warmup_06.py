@@ -4,7 +4,10 @@ from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
 from llama_index.readers.file import PyMuPDFReader # To read brightleaf_pdfs
 import json
 
-load_dotenv()
+if load_dotenv():
+    print("API key loaded successfully.")
+else:
+    print("Warning: could not load API key. Check your .env file.")
 client = OpenAI()
 
 response = client.chat.completions.create(
