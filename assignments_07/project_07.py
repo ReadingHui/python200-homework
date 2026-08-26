@@ -1,0 +1,131 @@
+import pandas as pd
+import json
+import os
+from scipy.stats import pearsonr
+
+# smolagents imports
+from smolagents import ToolCallingAgent, OpenAIServerModel, tool
+from smolagents import CodeAgent
+
+# Pre-task: Load the Data
+DATA_PATH = "assignments_01/outputs/merged_happiness.csv"
+df = None
+
+# Task 1: Define Your Tools
+# Tool 1: load_happiness_data
+@tool
+def load_happiness_data() -> dict:
+    """Load the World Happiness dataset into memory.
+    
+    Returns:
+        A dict with the shape and columns of the df, or an error dict.
+    """
+    if os.path.exists(DATA_PATH):
+        df = pd.read_csv(DATA_PATH, index_col=0)
+    else:
+        dfs = []
+        for year in range(2015, 2025):
+            df = pd.read_csv(f'./happiness_project/world_happiness_{year}.csv', sep=';')
+            if year == 2024:
+                df = df.rename({'Ladder score': 'Happiness score'}, axis=1)
+            for f in ['Happiness score', 
+                        'GDP per capita',
+                        'Social support',
+                        'Freedom to make life choices',
+                        'Generosity',
+                        'Perceptions of corruption']:
+                df[f] = df[f].str.replace(',', '.').astype(float)
+            df['Year'] = year
+            dfs.append(df)
+        df = pd.concat(dfs)    
+    return {
+        "shape": df.shape,
+        "columns": df.columns,
+    }
+
+# Tool 2: summarize_column
+@tool
+def summarize_column(column: str) -> dict:
+    """Return descriptive statistics for a single column in the loaded dataset using df.describe().
+    
+    Args:
+        column: The name of the column to describe.
+
+    Returns:
+        A dict of the description, or an error dict.
+    """
+    if not column:
+        return {"error": "Column is missing."}
+    elif not df:
+        return {"error": "No data is loaded."}
+    elif column not in df.columns:
+        return {"error": "Column not found."}
+    else:
+        return df[column].describe().to_dict()
+
+# Tool 3: compute_correlation
+@tool
+def compute_correlation(col1: str, col2: str) -> dict:
+    """Compute the Pearson correlation coefficient and p-value between two numeric columns.
+    
+    Args:
+        col1: Column name for first column. 
+        col2: Column name for second column.
+    
+    Returns:
+        Returns a dict containing the name of both columns, correlation coefficient and p-value, or an error string.
+    """
+    if not col1:
+        return {"error": "col1 not provided."}
+    if not col2:
+        return {"error": "col2 not provided."}
+    if col1 not in df.columns:
+        return {
+            "error": f"column '{col1}' is not in {df.columns.tolist()}"
+        }
+    if col2 not in df.columns:
+        return {
+            "error": f"column '{col2}' is not in {df.columns.tolist()}"
+        }
+    res = pearsonr(df[col1], df[col2])
+    return {
+        "col1": col1,
+        "col2": col2,
+        "pearson_r": res.statistic,
+        "p_value": res.pvalue
+    }
+
+# Tool 4: get_top_n_countries
+@tool
+def get_top_n_countries(column: str, year: int, n: int = 5) -> dict:
+    """Return the top N countries ranked by a given column for a specific year.
+    
+    Args:
+        column: Column name of the column to be ranked by
+        year: year to be filtered
+        n: value of N in "top N countries"
+    
+    Returns:
+        A dict with key "countries" and value of the list of the countries in dicts with key "country"
+    """
+    if not column:
+        return {"error": "column not provided."}
+    if column not in df.columns:
+        return {
+            "error": f"column '{column}' is not in {df.columns.tolist()}"
+        }
+    if not isinstance(year, int):
+        return {"error": "year has to be an int."}
+    if year < 2015 or year > 2024:
+        return {"error": "year out of range, year has to be between 2015 to 2024."}
+    if n < 1:
+        return {"error": f"n = {n} is out of range, it has to be a positive integer."}
+
+    top_df = df[df['Year'] == year].copy()
+    top_list = top_df.sort_values(by=column, ascending=False).head(n)["Country"].to_list()
+    return {
+        "countries": [
+            {"country": c} for c in top_list
+        ]
+    }
+    
