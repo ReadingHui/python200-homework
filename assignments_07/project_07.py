@@ -20,6 +20,7 @@ def load_happiness_data() -> dict:
     Returns:
         A dict with the shape and columns of the df, or an error dict.
     """
+    global df
     if os.path.exists(DATA_PATH):
         df = pd.read_csv(DATA_PATH, index_col=0)
     else:
@@ -123,7 +124,5 @@ def get_top_n_countries(column: str, year: int, n: int = 5) -> dict:
 
     top_df = df[df['Year'] == year].copy()
     top_list = top_df.sort_values(by=column, ascending=False).head(n).rename({"Country": "country"}, axis=1).to_dict(orient='records')
-    return {
-        "countries": top_list
-    }
+    return top_list
     
