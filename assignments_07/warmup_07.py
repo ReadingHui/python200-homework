@@ -448,8 +448,8 @@ class CsvManager:
         return {
             "col1": col1,
             "col2": col2,
-            "pearson_r": res.statistic,
-            "p_value": res.pvalue
+            "pearson_r": round(res.statistic, 4),
+            "p_value": round(res.pvalue, 4)
         }
 
 print("Class defined")
@@ -703,8 +703,9 @@ result = run_agent_cycle(messages, "Load bike_commute.csv and compute the correl
 print(result)
 
 # Q6
-# Reason steps: system, user, assistnat
+# Reason steps: assistant
 # Action step: tool
+# System and User are not a part of Reason nor Action step.
 print("=== Q6 ===")
 print(json.dumps(messages, indent=2, default=str))
 

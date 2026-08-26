@@ -25,18 +25,18 @@ def load_happiness_data() -> dict:
     else:
         dfs = []
         for year in range(2015, 2025):
-            df = pd.read_csv(f'./happiness_project/world_happiness_{year}.csv', sep=';')
+            year_df = pd.read_csv(f'./happiness_project/world_happiness_{year}.csv', sep=';')
             if year == 2024:
-                df = df.rename({'Ladder score': 'Happiness score'}, axis=1)
+                year_df = year_df.rename({'Ladder score': 'Happiness score'}, axis=1)
             for f in ['Happiness score', 
                         'GDP per capita',
                         'Social support',
                         'Freedom to make life choices',
                         'Generosity',
                         'Perceptions of corruption']:
-                df[f] = df[f].str.replace(',', '.').astype(float)
-            df['Year'] = year
-            dfs.append(df)
+                year_df[f] = year_df[f].str.replace(',', '.').astype(float)
+            year_df['Year'] = year
+            dfs.append(year_df)
         df = pd.concat(dfs)    
     return {
         "shape": df.shape,
@@ -91,8 +91,8 @@ def compute_correlation(col1: str, col2: str) -> dict:
     return {
         "col1": col1,
         "col2": col2,
-        "pearson_r": res.statistic,
-        "p_value": res.pvalue
+        "pearson_r": round(res.statistic, 4),
+        "p_value": round(res.pvalue, 4)
     }
 
 # Tool 4: get_top_n_countries
@@ -122,10 +122,8 @@ def get_top_n_countries(column: str, year: int, n: int = 5) -> dict:
         return {"error": f"n = {n} is out of range, it has to be a positive integer."}
 
     top_df = df[df['Year'] == year].copy()
-    top_list = top_df.sort_values(by=column, ascending=False).head(n)["Country"].to_list()
+    top_list = top_df.sort_values(by=column, ascending=False).head(n).rename({"Country": "country"}, axis=1).to_dict(orient='records')
     return {
-        "countries": [
-            {"country": c} for c in top_list
-        ]
+        "countries": top_list
     }
     
