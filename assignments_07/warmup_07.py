@@ -245,9 +245,11 @@ def run_agent(user_prompt: str) -> str:
 
 response_a = run_agent("What is 37 degrees Celsius in Fahrenheit?")
 print("Response A:", response_a)
+# A tool was called because the prompt explicitly asked for the conversion from degrees Celsius to degrees Fahrenheit.
 
 response_b = run_agent("What is the boiling point of water in plain English?")
 print("Response B:", response_b)
+# A tool was not called because the prompt is not related to the conversion from degrees Celsius to degrees Fahrenheit.
 print()
 
 # --- Lesson 03: Multi-Tool Agent ---
@@ -431,10 +433,17 @@ class CsvManager:
         Returns the correlation coefficient and p-value.
         """
         # your code here
+        loaded = self._ensure_loaded()
+        if loaded:
+            return loaded
         if col1 not in self.df.columns:
-            return f"Error: column '{col1}' is not in {self.df.columns.tolist()}"
+            return {
+                "error": f"column '{col1}' is not in {self.df.columns.tolist()}"
+            }
         if col2 not in self.df.columns:
-            return f"Error: column '{col2}' is not in {self.df.columns.tolist()}"
+            return {
+                "error": f"column '{col2}' is not in {self.df.columns.tolist()}"
+            }
         res = pearsonr(self.df[col1], self.df[col2])
         return {
             "col1": col1,
@@ -805,7 +814,11 @@ TOOLS = [
 print("=== Q7 ===")
 print(compute_correlation.description)
 print()
-# The smolagents generates automatically is basically the description in my JSON schema in Q4. Smolagents need the developer to write the description in Google-style docstrings in the functions, type hints and a descriptive function name.
+# While a manual JSON Schema requires explicitly defining nested keys (type, properties, required), smolagents automatically generates this schema by introspecting Python function definitions.
+# To produce an accurate and effective tool description, smolagents relies on three key inputs from the developer:
+# - Google-style docstring: smolagents parses the function’s docstring to generate both the tool description and the individual descriptions for each argument in the schema.
+# - Type Hints: Native Python type hints in order to define the JSON Schema data types ("type": "number").
+# - Descriptive Function and Parameter Names: Clear, self-documenting names for the LLM infer tool utility and argument intent during function calling.
 
 # Q8
 model_to_use = "gpt-4o-mini"  # default model ID
@@ -862,7 +875,7 @@ print()
 print("Response from code agent:")
 print(response_code)
 print()
-# The ToolCallingAgent created the plot using the given tool plot_data() without changing the color (as it cannot), while the CodeAgent produced a correct plot by writing its own code snippet and running it.
+# The ToolCallingAgent created the scatter plot using the given tool plot_data() without changing the color (as it cannot), while the CodeAgent produced a correct scatter plot by writing its own code snippet and running it.
 # This reveals CodeAgent is more useful when there are specific requirement from the user that is not coded in the tools before. While ToolCallingAgent is more useful when the tools are good enough for the user, no advanced customization required, as less token will be used.
 
 # Q9
@@ -870,4 +883,5 @@ print()
 # A: When doing something that is completely within the tool defined. In the example of the CsvManager, say, describe a single column of the dataframe. This is a task that is completely within the scope of the tool defined, without any customization required, that means the model can
 #    directly call the tool without any modification. ToolCallingAgent is more stable and require less tokens in this scenario, hence a better fit.
 # Q: What is one meaningful risk of using a CodeAgent that does not apply to a ToolCallingAgent? (Think about what's actually happening when the agent generates and runs code.)
-# A: One meaningful risk is unexpected high usage of token, as the CodeAgent generates and runs code by itself, if it writes some erroneous code, it may rewrite the code and run again, burning more and more token in the process.
+# A: One meaningful risk is arbitrary code execution, which could lead to uninteded side effects. As the CodeAgent generates and runs code by itself, if it writes some erroneous code due to flawed logic from the LLM, it may create unintended infinite loop, file/data deletion etc., which could lock up resources, crash the runtime and even cause irreversible damage to the machine.
+#    In comparison, ToolCallingAgent uses predefined tools, which has no way of causing the aforementioned problems.
