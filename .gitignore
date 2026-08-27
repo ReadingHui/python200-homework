@@ -129,7 +129,7 @@ celerybeat.pid
 
 # Environments
 .env
-.venv
+.venv/
 env/
 venv/
 ENV/
@@ -186,3 +186,6 @@ happiness_project/
 
 # API Keys
 .env
+
+# Assignments_06 resources
+resources/
