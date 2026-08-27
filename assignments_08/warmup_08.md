@@ -38,7 +38,7 @@ Now describe IaaS, PaaS, and SaaS in your own words. For each, give one example 
 * Gmail: SaaS, it is a serverless compute running on the Google App Engine
 * Azure Virtual Machines: IaaS, it provides customization down to hardware and OS
 * AWS S3: IaaS, it provides object storage
-* GitHub Codespaces: SaaS, it provides a compute platform of sandbox web application deployment space
+* GitHub Codespaces: PaaS, it provides a compute platform of sandbox web application deployment space
 * Snowflake: SaaS, it is a cloud data platform for web-based data warehouse and data lake
 * Supabase: BaaS, it provides a cloud backend for PostgreSQL database access
 

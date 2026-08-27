@@ -26,3 +26,6 @@ It seems like Supabase updated how the API keys are handled, the `anon` `public`
 
 ## Summary
 The prices do surprise me that it is not actually quite cheap tp set up a basic EC2 instance, but it could scale up really quickly as the demand increases. It is really interesting to see how customizable a cloud service can be, with all the options, there are thousand to millions of combinations we can get, which in itself could be a headache too. The second instance is so much more expensive, and the cost mainly came from the EC2 instance with the GPU attached. Hence, unless we are doing some heavy GPU-relying tasks like model training, it should be generally not worth to go for them.
+
+# Introduction video
+[Video Link](https://youtu.be/YBZXA_C5ubE)
