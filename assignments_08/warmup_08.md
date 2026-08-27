@@ -81,8 +81,8 @@ A managed data platform is an SaaS service, where all the data analytic tools su
 The lesson names two situations where the cloud is probably not the right choice. What are they?
 
 ### Answer:
-- Dataset fits comfortably on a single machine 
-- You do not have massive compute demands
+- Dataset fits comfortably on a single machine and you do not have massive compute demands
+- Cost is too steep for a simple application
 
 # Part 2: Warmup — Cloud Landscape
 ## Cloud Landscape Question 1
