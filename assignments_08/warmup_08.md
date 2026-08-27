@@ -35,7 +35,7 @@ Before writing your definitions, classify each item in the list below as IaaS, P
 Now describe IaaS, PaaS, and SaaS in your own words. For each, give one example (from the lesson or the list above) and describe what you, as the developer, are responsible for managing.
 
 ### Answer:
-* Gmail: SaaS, it is a serverless compute running on the Google App Engine
+* Gmail: SaaS, it is running on the Google App Engine
 * Azure Virtual Machines: IaaS, it provides customization down to hardware and OS
 * AWS S3: IaaS, it provides object storage
 * GitHub Codespaces: PaaS, it provides a compute platform of sandbox web application deployment space
@@ -130,6 +130,3 @@ The lesson says most projects don't use one provider for everything. Describe a 
 A simple image classification project of Pokemon Cards, where I could be using Supabase for the relational database to store the map between the name/id of the card and the details of the card (like price, type, foil treatments), Vertex AI for the actual model training and deployment, and AWS S3 for the image storage for comparison.
 
 Consolidating to one provider limits the possibility of one service being down affecting the whole project, and easier integration between the moving parts. However, I will be giving up on the flexibility of choosing the best service out there, and the easy access to some like Supabase.
-
-# Introduction video
-[Video Link](https://youtu.be/YBZXA_C5ubE)
