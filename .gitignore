@@ -187,5 +187,8 @@ happiness_project/
 # API Keys
 .env
 
-# Assignments_06 resources
+# assignments resources
 resources/
+
+# Temporary data
+temp/
