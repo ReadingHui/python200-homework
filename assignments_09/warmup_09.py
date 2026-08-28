@@ -1,13 +1,16 @@
+import os
+from dotenv import load_dotenv
+from supabase import create_client
+from datetime import datetime, timedelta
+
 # --- Supabase Connection ---
 # Q1
-# The two piece of information are the project url and the anon API key. I found them at the `Project Overview`, under the project name, with the `Copy` button.
+# The two Supabase credentials are the project url and the anon API key. I found them at the `Project Overview`, under the project name, with the `Copy` button.
 # They should never be hardcoded in a Python script because when published, bots can scrap them within seconds and have access to the project as if they were you,
 # causing major security breach.
 
 # Q2
-import os
-from dotenv import load_dotenv
-from supabase import create_client
+
 def get_client():
     load_dotenv()
     try:
@@ -19,12 +22,11 @@ def get_client():
     return supabase
 
 # Q3
-# Row Level Security (RLS) is a security measure implemented on row level, like restricting user can only read their own rows. We are disabling them because it adds complexity during development.
+# Row Level Security (RLS) is a security measure implemented on row level, controlling thw row access per user, like restricting user can only read their own rows. We are disabling them because it adds complexity during development.
 # Some real-world application would be better to keep it enabled, like writing and reading bank transaction record, user should not be permitted to read and alter other users record but their own.
 
 # --- supabase-py CRUD ---
 # Q1
-from datetime import datetime
 def insert_test_record(supabase):
     today = str(datetime.now().date())
     row = {
@@ -42,7 +44,7 @@ def insert_test_record(supabase):
 # to create a new one and raise an error.
 
 # Q2
-def get_record_by_date_range(supabase, start, end):
+def get_records_by_date_range(supabase, start, end):
     response = (supabase
                .table("weather_raw")
                .select("*")
@@ -75,8 +77,8 @@ def safe_upsert(supabase, records):
 if __name__ == "__main__":
     supabase = get_client()
     insert_test_record(supabase)
-    start = "2026-08-26"
-    end = "2026-08-28"
+    start = str(datetime.now().date() - timedelta(days=1))
+    end = str(datetime.now().date() + timedelta(days=1))
     print(f"Records between {start} and {end}:")
-    print(get_record_by_date_range(supabase, start, end))
+    print(get_records_by_date_range(supabase, start, end))
     print()
