@@ -40,7 +40,9 @@ def insert_test_record(supabase):
     print("One testing record inserted.")
 
 # Running it twice will generate a postgrest.exceptions.APIError on duplicate primary key values
-# because there is already an entry with the same primary key `date`.
+# because there is already an entry with the same primary key `date`. Using upsert() instead will 
+# be safer as it will check whether the primary key value exists already, if so, it just updates 
+# instead of trying to insert, preventing the error.
 
 # Q2
 def get_records_by_date_range(supabase, start, end):
@@ -78,19 +80,3 @@ if __name__ == "__main__":
     print(f"Records between {start} and {end}:")
     print(get_records_by_date_range(supabase, start, end))
     print()
-    rows = [{
-        "date": str(datetime.now().date()),
-        "temperature_2m_max": 30.9,
-        "temperature_2m_min": 23.3,
-        "precipitation_sum": 0,
-        "wind_speed_10m_max": 21.1,
-    },
-    {
-        "date": str(datetime.now().date() + timedelta(days=1)),
-        "temperature_2m_max": 30.9,
-        "temperature_2m_min": 23.3,
-        "precipitation_sum": 0,
-        "wind_speed_10m_max": 21.1,
-    }
-    ]
-    safe_upsert(supabase, rows)
