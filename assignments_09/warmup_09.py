@@ -61,7 +61,7 @@ def get_records_by_date_range(supabase, start, end):
 # the same primary key (unless the user has been hacked or major bug in code).
 def safe_upsert(supabase, records):
     response = supabase.table("weather_raw").upsert(records, on_conflict="date").execute()
-    print(f"There are {response.count} rows affected.")
+    print(f"There are {len(response.data)} rows affected.")
 
 # --- Idempotency ---
 # Idempotency is crucial in a data pipeline because the data are being written/read automatically in a large quantity.
@@ -78,3 +78,19 @@ if __name__ == "__main__":
     print(f"Records between {start} and {end}:")
     print(get_records_by_date_range(supabase, start, end))
     print()
+    rows = [{
+        "date": str(datetime.now().date()),
+        "temperature_2m_max": 30.9,
+        "temperature_2m_min": 23.3,
+        "precipitation_sum": 0,
+        "wind_speed_10m_max": 21.1,
+    },
+    {
+        "date": str(datetime.now().date() + timedelta(days=1)),
+        "temperature_2m_max": 30.9,
+        "temperature_2m_min": 23.3,
+        "precipitation_sum": 0,
+        "wind_speed_10m_max": 21.1,
+    }
+    ]
+    safe_upsert(supabase, rows)
