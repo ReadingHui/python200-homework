@@ -17,12 +17,12 @@ def get_client():
         url = os.environ["SUPABASE_URL"]
         key = os.environ["SUPABASE_KEY"]
     except KeyError as e:
-        raise RuntimeError(f"Missing required environment variable: {e}")
+        raise RuntimeError(f"Missing required Supabase credential: {e}")
     supabase = create_client(url, key)
     return supabase
 
 # Q3
-# Row Level Security (RLS) is a security measure implemented on row level, controlling thw row access per user, like restricting user can only read their own rows. We are disabling them because it adds complexity during development.
+# Row Level Security (RLS) is a security measure implemented on row level, controlling the row access per user, like restricting user can only read their own rows. We are disabling them because it adds complexity during development, and allowing easier course setup/testing on the shared tables.
 # Some real-world application would be better to keep it enabled, like writing and reading bank transaction record, user should not be permitted to read and alter other users record but their own.
 
 # --- supabase-py CRUD ---
@@ -36,12 +36,10 @@ def insert_test_record(supabase):
         "precipitation_sum": 0,
         "wind_speed_10m_max": 21.1,
     }
-    supabase.table("weather_raw").upsert(row, on_conflict="date").execute()
+    supabase.table("weather_raw").insert(row).execute()
 
-# If the function was written using .insert() instead of .upsert(), running it twice will generate an error
-# because there is already an entry with the same primary key `date`. Hence I used .upsert() instead, this 
-# function checks if the primary key already exists, if yes, it will just update the entry instead of attempting
-# to create a new one and raise an error.
+# Running it twice will generate a postgrest.exceptions.APIError on duplicate primary key values
+# because there is already an entry with the same primary key `date`.
 
 # Q2
 def get_records_by_date_range(supabase, start, end):
@@ -62,10 +60,7 @@ def get_records_by_date_range(supabase, start, end):
 # the same primary key (unless the user has been hacked or major bug in code).
 def safe_upsert(supabase, records):
     supabase.table("weather_raw").upsert(records, on_conflict="date").execute()
-    if isinstance(records, dict):
-        print("There is 1 row affected.")
-    else:
-        print(f"There are {len(records)} rows affected.")
+    print(f"There are {len(records)} rows affected.")
 
 # --- Idempotency ---
 # Idempotency is crucial in a data pipeline because the data are being written/read automatically in a large quantity.
