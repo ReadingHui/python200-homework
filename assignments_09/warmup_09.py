@@ -37,6 +37,7 @@ def insert_test_record(supabase):
         "wind_speed_10m_max": 21.1,
     }
     supabase.table("weather_raw").insert(row).execute()
+    print("One testing record inserted.")
 
 # Running it twice will generate a postgrest.exceptions.APIError on duplicate primary key values
 # because there is already an entry with the same primary key `date`.
@@ -59,8 +60,8 @@ def get_records_by_date_range(supabase, start, end):
 # I would use upsert() when I want to sync data, say a user's profile, we want it to be the most updated, and it has low chance of having
 # the same primary key (unless the user has been hacked or major bug in code).
 def safe_upsert(supabase, records):
-    supabase.table("weather_raw").upsert(records, on_conflict="date").execute()
-    print(f"There are {len(records)} rows affected.")
+    response = supabase.table("weather_raw").upsert(records, on_conflict="date").execute()
+    print(f"There are {response.count} rows affected.")
 
 # --- Idempotency ---
 # Idempotency is crucial in a data pipeline because the data are being written/read automatically in a large quantity.
