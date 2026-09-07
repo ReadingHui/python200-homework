@@ -41,3 +41,22 @@
 # To change the validation logic, I would change the if len(sentences) > 2 to (!= 3 or sentences[-1] != "")
 # This makes sure there are 2 sentences. 
 
+# Q2
+from time import sleep
+
+def call_with_retry(client, messages, max_retries=3):
+    for tries in range(max_retries):
+        try:
+            response = client.chat.completions.create(
+                model='gpt-4.1-mini',
+                messages=messages,
+                tool_choice='auto',  # model chooses whether to use a tool
+            )
+            return response
+        except Exception as e:
+            print(f"Error Message: {e}, try #{tries + 1}, retrying in 2 seconds...")
+            sleep(2)
+    return None
+
+# This will be used in the pipeline as the enriching step, where the API data is sent to GPT using this helper function, so it will retry up to 3 times instead of directly returning None upon
+# the first failure, adding robustness to the pipeline.
