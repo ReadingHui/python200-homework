@@ -51,8 +51,7 @@ def call_with_retry(client, messages, max_retries=3):
         try:
             response = client.chat.completions.create(
                 model='gpt-4o-mini',
-                messages=messages,
-                tool_choice='auto',  # model chooses whether to use a tool
+                messages=messages
             )
             return response
         except Exception as e:
