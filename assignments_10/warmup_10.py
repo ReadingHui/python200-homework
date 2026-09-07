@@ -38,7 +38,9 @@
 # "Be direct, practical, and specific to the conditions. "
 # "Do not use bullet points, headers, or phrases like 'Based on the data'."
 
-# To change the validation logic, I would change the if len(sentences) > 2 to (!= 3 or sentences[-1] != "")
+# To change the validation logic, I would change the `if len(sentences) > 2`` to 
+# sentences = [s for s in text.split('.') if s.strip()]
+# if len(sentences) != 2:
 # This makes sure there are 2 sentences. 
 
 # Q2
@@ -48,7 +50,7 @@ def call_with_retry(client, messages, max_retries=3):
     for tries in range(max_retries):
         try:
             response = client.chat.completions.create(
-                model='gpt-4.1-mini',
+                model='gpt-4o-mini',
                 messages=messages,
                 tool_choice='auto',  # model chooses whether to use a tool
             )
@@ -59,4 +61,4 @@ def call_with_retry(client, messages, max_retries=3):
     return None
 
 # This will be used in the pipeline as the enriching step, where the API data is sent to GPT using this helper function, so it will retry up to 3 times instead of directly returning None upon
-# the first failure, adding robustness to the pipeline.
+# the first failure, adding robustness to the pipeline in case there are transient API failures.
