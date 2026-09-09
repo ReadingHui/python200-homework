@@ -32,8 +32,8 @@ def call_api():
 @task
 def upsert_records(enrichment_records: list):
     logger = get_run_logger()
-    ...
-    logger.info(f"{len(enrichment_records)} enrichment records were upserted.")
+    # TODO: upsert enrichment_records into destination
+    logger.info(f"Upserted {len(enrichment_records)} enrichment records.")
 
 # Q4
 # The incremental processing check in the transform task make the task idempotent as it allows the task to pick up from where it left off last time, preventing it re-run the data
