@@ -4,7 +4,8 @@ from prefect.logging import get_run_logger
 # --- Prefect Orchestration ---
 # Q1
 # @task defines a task in the whole pipeline, while @flow orchestrate the whole pipeline. The helper function will not be decorated with @task,
-# as there is no I/O, there is no need to log any of the run.
+# as there is no I/O, it doesn't touch an external system. There is no orchestration benefit, no retry lofic, no independent observability need 
+# and no concurrency benefit. 
 
 
 
@@ -32,7 +33,6 @@ def call_api():
 @task
 def upsert_records(enrichment_records: list):
     logger = get_run_logger()
-    # TODO: upsert enrichment_records into destination
     logger.info(f"Upserted {len(enrichment_records)} enrichment records.")
 
 # Q4
