@@ -13,22 +13,33 @@ from prefect.logging import get_run_logger
 # Loading configs
 with open("config.json") as f:
     configs = json.load(f)
-OPEN_MATEO_URL = configs['OPEN_MATEO_URL']
-OPEN_MATEO_PARAMS = configs['OPEN_MATEO_PARAMS']
-OPEN_MATEO_FEATURES = configs['OPEN_MATEO_FEATURES']
+OPEN_METEO_URL = configs['OPEN_METEO_URL']
+OPEN_METEO_PARAMS = configs['OPEN_METEO_PARAMS']
+OPEN_METEO_FEATURES = configs['OPEN_METEO_FEATURES']
 
 MODEL_DIR = configs['MODEL_DIR']
 
 
 # `extract` task
-@task(retries=2, retry_delay_seconds=10)
+@task(name='extract_weather_from_api', retries=2, retry_delay_seconds=10)
 def extract():
-    response = requests.get(OPEN_MATEO_URL, params=OPEN_MATEO_PARAMS)
-    response.raise_for_status()
+    logger = get_run_logger()
+    try:
+        response = requests.get(OPEN_METEO_URL, params=OPEN_METEO_PARAMS, timeout=10)
+        response.raise_for_status()
+    except requests.exceptions.Timeout:
+        logger.error("Request to Open-Meteo timed out.")
+        raise
+    except requests.exceptions.HTTPError as e:
+        logger.error(f"Open-Meteo returned an HTTP error: {e}")
+        raise
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request to Open-Meteo failed: {e}")
+        raise
     df = pd.DataFrame(response.json()["daily"])
     df["date"] = pd.to_datetime(df["time"]).astype(str)
     df = df.drop("time", axis=1)
-    df = df[OPEN_MATEO_FEATURES] # Put the features in correct order
+    df = df[OPEN_METEO_FEATURES] # Put the features in correct order
     row_dicts = df.to_dict(orient="records")
     print(f"Raw data extracted. Total of {len(row_dicts)} rows.")
     return row_dicts
@@ -36,27 +47,32 @@ def extract():
 # `load_raw` task
 def get_supabase_client():
     load_dotenv()
+    logger = get_run_logger()
     try:
         url = os.environ["SUPABASE_URL"]
         key = os.environ["SUPABASE_KEY"]
     except KeyError as e:
         raise RuntimeError(f"Missing required Supabase credential: {e}")
     supabase = create_client(url, key)
+    logger.info("Connected to Supabase.")
     return supabase
 
-@task(retries=2, retry_delay_seconds=5)
+@task(name='load_raw_data', retries=2, retry_delay_seconds=5)
 def load_raw(records):
+    logger = get_run_logger()
     supabase = get_supabase_client()
     response = supabase.table("weather_raw").upsert(records, on_conflict="date").execute()
+    logger.info(f"Upserted {len(response.data)} rows.")
     print(f"Upserted {len(response.data)} rows.")
     return 
 
 # `transform` task
 def incremental_check(supabase, records):
+    logger = get_run_logger()
     enriched_response = supabase.table("weather_enriched").select("date").execute()
     already_done = {row["date"] for row in enriched_response.data}
     to_classify = [row for row in records if row["date"] not in already_done]
-    print(f"Records to classify: {len(to_classify)} (skipping {len(already_done)} already enriched)")
+    logger.info(f"Records to classify: {len(to_classify)} (skipping {len(already_done)} already enriched)")
     return to_classify
 
 def load_model(model_file: str="weather_classifier.pkl", feature_json: str="weather_classifier_metadata.json"):
@@ -66,6 +82,11 @@ def load_model(model_file: str="weather_classifier.pkl", feature_json: str="weat
     # Loads feature names
     with open(os.path.join(MODEL_DIR, feature_json)) as f:
         features = json.load(f)['features']
+
+    # Validating feature names
+    for f in features:
+        if f not in clf.feature_names_in_:
+            raise KeyError(f"Feature {f} not found in the model.")
     return clf, features
 
 def predict(clf, records, features):
@@ -107,8 +128,9 @@ def validate_summary(text):
         return None
     return text
 
-@task
+@task(name='ml_prediction_and_llm_transform')
 def transform(records):
+    logger = get_run_logger()
     supabase = get_supabase_client()
 
     # Incremental check
@@ -158,32 +180,33 @@ def transform(records):
             summary = response.choices[0].message.content.strip()
         except Exception as e:
             print(f"API error on {record['date']}: {e}")
+            logger.warning(f"API error on {record['date']}: {e}")
             summary = "Recommendation unavailable."
         if not validate_summary(summary):
             print(f"Summary validation failed on {record['date']}")
-            print(summary)
+            logger.warning(f"Summary validation failed on {record['date']}, summary:")
+            logger.warning(f"{summary}")
             summary = "Recommendation unavailable."
         record["llm_summary"] = summary
 
         if (i + 1) % 50 == 0:
             print(f"  Enriched {i + 1} / {len(enrichment_records)} records...")
 
-        # if i > 10:
-        #     break
-
     return enrichment_records
 
 # `load_enriched` task
 @task(retries=2, retry_delay_seconds=5)
 def load_enriched(enrichment_records):
+    logger = get_run_logger()
     if not enrichment_records:
         print("There is nothing to upsert.")
         return
     supabase = get_supabase_client()
     response = supabase.table("weather_enriched").upsert(enrichment_records, on_conflict="date").execute()
+    logger.info(f"There are {len(response.data)} row upserted.")
     print(f"There are {len(response.data)} row upserted.")
 
-@flow(log_prints=True)
+@flow(name="complete_etl_pipeline", log_prints=True)
 def etl_pipeline():
     raw_records = extract()
     load_raw(raw_records)
