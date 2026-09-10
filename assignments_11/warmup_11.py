@@ -31,7 +31,7 @@ def call_api():
 
 # Q3
 @task
-def upsert_records(enrichment_records: list):
+def load_enriched(enrichment_records: list):
     logger = get_run_logger()
     logger.info(f"Upserted {len(enrichment_records)} enrichment records.")
 

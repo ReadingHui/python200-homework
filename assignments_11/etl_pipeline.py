@@ -121,7 +121,7 @@ def transform(records):
     clf, features = load_model()
 
     # Running `predict` and `predict_proba`
-    prediction, probabilities = predict(clf, records, features)
+    prediction, probabilities = predict(clf, pd.DataFrame(to_classify), features)
 
     # Make enrichment records
     enrichment_records = enrich_records(to_classify, prediction, probabilities)
@@ -157,10 +157,10 @@ def transform(records):
             )
             summary = response.choices[0].message.content.strip()
         except Exception as e:
-            print(f"API error on {record["date"]}: {e}")
+            print(f"API error on {record['date']}: {e}")
             summary = "Recommendation unavailable."
         if not validate_summary(summary):
-            print(f"Summary validation failed on {record["date"]}")
+            print(f"Summary validation failed on {record['date']}")
             print(summary)
             summary = "Recommendation unavailable."
         record["llm_summary"] = summary
