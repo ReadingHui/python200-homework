@@ -1,3 +1,5 @@
+# Video link: https://youtu.be/MompJvYL3gU
+
 import os
 import requests
 import json
@@ -137,7 +139,7 @@ def transform(records):
     to_classify = incremental_check(supabase, records)
     if not to_classify:
         print("No new rows to be enriched.")
-        return None
+        return []
 
     # Load model and features
     clf, features = load_model()
