@@ -205,7 +205,8 @@ for q in questions:
     response = query_engine.query(q)
     print("A:", response)
     
-    for node_with_score in response.source_nodes:
+    for i, node_with_score in enumerate(response.source_nodes):
+        print(f"Node #{i}:")
         print(f"Similarity Score: {node_with_score.score:.4f}")
         print(f"Text Snippet: {node_with_score.node.get_content()[:150]}...")
         print("-" * 30)
