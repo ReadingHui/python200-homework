@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 from pathlib import Path
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
-import os
 import logging
 
 # Silence HTTP request logs from httpx / OpenAI API calls
@@ -27,7 +26,7 @@ docs = SimpleDirectoryReader(
     ).load_data()
 print("=== Step 2: Load the Documents ===")
 print(f"Loaded {len(docs)} documents.")
-print(f"File names: {[doc.metadata["file_name"] for doc in docs]}")
+print(f"File names: {[doc.metadata['file_name'] for doc in docs]}")
 
 # Step 3: Build the Index and Query Engine
 index = VectorStoreIndex.from_documents(docs)
@@ -49,7 +48,7 @@ for q in questions:
     
     top_source_node = response.source_nodes[0]
     print("=== Top response result ===")
-    print(f"Document name: {top_source_node.metadata["file_name"]}")
+    print(f"Document name: {top_source_node.metadata['file_name']}")
     print(f"Similarity Score: {top_source_node.score:.4f}")
     print(f"Text Snippet: {top_source_node.node.get_content()[:200]}...")
     print("-" * 30)
@@ -71,7 +70,7 @@ print("-" * 30)
 source_nodes = response.source_nodes
 for i, s in enumerate(source_nodes):
     print(f"=== Document {i + 1} ===")
-    print(f"Document name: {s.metadata["file_name"]}")
+    print(f"Document name: {s.metadata['file_name']}")
     print(f"Similarity Score: {s.score:.4f}")
     print(f"Text Snippet: {s.node.get_content()[:200]}...")
     print("-" * 30)
