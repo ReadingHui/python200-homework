@@ -33,25 +33,28 @@ print(response_txt)
 # none training data on the web.
 
 # Scenario C:
-# As the LLM only need to read a single two-page report without
-# having to be reused, simple prompt engineering will be the 
-# simplest and fastest method to do so.
+ # Since the document is only two pages, the entire text easily fits 
+ # directly into the LLM's context window, making prompt engineering 
+ # (in-context learning) the fastest and most cost-effective approach. 
+ # Building a RAG pipeline or fine-tuning a model would add unnecessary 
+ # architecture and cost for a one-off task with no need for scalability 
+ # or dynamic retrieval across larger document sets.
 
 # Concept Q2
-# A confidently wrong answer can give a false sense of security
-# to the user, assuming the model knew what they are talking about,
-# and trust it without a doubt. Answers with "I am not sure" prompts
-# the user to double-check what the model replies, and hence have a
-# higher chance of catching errors. A real situation would be Vibe Coding,
-# especially on niche applications, the model may provide insecure code or
-# even leaking sensitive data. There were cases where the user trusted the
-# model and hard-coded their personal API key into the code, hence leaking
-# them, costing them hundreds and thousands of dollars.
+# A confident, polished tone exploits human trust heuristics, making authoritative 
+# outputs feel inherently reliable and discouraging users from double-checking facts. 
+# Conversely, an output containing "I am not sure" signals low confidence, prompting 
+# the user to independently verify the information before taking action.
+# In software development, an LLM might confidently suggest installing a non-existent 
+# software package or library (a package hallucination). Because the model presents the 
+# command with total certainty, a developer runs it without verification—allowing attackers 
+# who registered that fake package name on PyPI/npm to execute malicious code on the 
+# developer's system.
 
 # Concept Q3
 # Original order:
 # steps = [
-#     "Generate a response from the LLM",
+#     "Generate a response from the LLM",      
 #     "Extract text from source documents",
 #     "Receive the user's query",
 #     "Retrieve the most relevant chunks",
@@ -63,14 +66,14 @@ print(response_txt)
 
 # Correct order:
 # steps = [
-#     "Extract text from source documents",
-#     "Split text into chunks",
-#     "Convert text chunks into embeddings",
-#     "Receive the user's query",
-#     "Embed the user's query",
-#     "Retrieve the most relevant chunks",
-#     "Inject retrieved chunks into the prompt",
-#     "Generate a response from the LLM",
+#     "Extract text from source documents",         # This step load the text of the document into the Python script
+#     "Split text into chunks",                     # This step splits the document text into chunks so that it fits in the LLM context window
+#     "Convert text chunks into embeddings",        # This step embeds the text chunks into sementic vectors in the embedding space
+#     "Receive the user's query",                   # This step takes user's input
+#     "Embed the user's query",                     # This step embeds the user input into sementic vectors in the embedding space
+#     "Retrieve the most relevant chunks",          # This step compares the user input and document embeddings by cosine similarity to find the most relevant chunks
+#     "Inject retrieved chunks into the prompt",    # This step fetchs the original chunk text and inject it to the prompt
+#     "Generate a response from the LLM",           # This step pass the prompt through the LLM and generate the response
 # ]
 
 # --- Keyword RAG ---
@@ -168,13 +171,13 @@ print()
 #       score, we can retrieve the closest meaning chunk to the query even if none of the exact words appeared.
 
 # Semantic Q2
-# | Feature                    | Keyword RAG                       | Semantic RAG                       |
-# |----------------------------|-----------------------------------|------------------------------------|
-# | What is compared?          | Exact word overlap                | Semantic meaning of query and chunk|
-# | What is retrieved?         | Full document                     | Embedding vector of the chunk      |
-# | Can it handle synonyms?    | No                                | Yes                                |
-# | Storage format             | Plain text dictionary             | Vectorized database                |
-# | Relevance score            | Number of overlapping keywords    | Cosine similarity score            |
+# | Feature                    | Keyword RAG                       | Semantic RAG                                           |
+# |----------------------------|-----------------------------------|--------------------------------------------------------|
+# | What is compared?          | Exact word overlap                | High-dimensional embedding vectors (conceptual meaning)|
+# | What is retrieved?         | Full document                     | Specific document chunks / text passages               |
+# | Can it handle synonyms?    | No                                | Yes                                                    |
+# | Storage format             | Plain text dictionary             | Vectorized database                                    |
+# | Relevance score            | Number of overlapping keywords    | Cosine similarity score                                |
 
 # --- LlamaIndex ---
 brightleaf_path = "assignments_06/resources/brightleaf_pdfs"
@@ -202,7 +205,8 @@ for q in questions:
     response = query_engine.query(q)
     print("A:", response)
     
-    for node_with_score in response.source_nodes:
+    for i, node_with_score in enumerate(response.source_nodes):
+        print(f"Node #{i}:")
         print(f"Similarity Score: {node_with_score.score:.4f}")
         print(f"Text Snippet: {node_with_score.node.get_content()[:150]}...")
         print("-" * 30)
@@ -224,27 +228,27 @@ print("=== Llama Q2 ===")
 print("similarity_top_k=1")
 
 query_engine = index.as_query_engine(similarity_top_k=1)
-for q in questions:
-    print(f"\nQ: {q}")
-    response = query_engine.query(q)
-    print("A:", response)
-    
-    for node_with_score in response.source_nodes:
-        print(f"Similarity Score: {node_with_score.score:.4f}")
-        print("-" * 30)
+q = questions[0]
+print(f"\nQ: {q}")
+response = query_engine.query(q)
+print("A:", response)
+
+for node_with_score in response.source_nodes:
+    print(f"Similarity Score: {node_with_score.score:.4f}")
+    print("-" * 30)
 
 print("=== Llama Q2 ===")
 print("similarity_top_k=5")
 
 query_engine = index.as_query_engine(similarity_top_k=5)
-for q in questions:
-    print(f"\nQ: {q}")
-    response = query_engine.query(q)
-    print("A:", response)
-    
-    for node_with_score in response.source_nodes:
-        print(f"Similarity Score: {node_with_score.score:.4f}")
-        print("-" * 30)
+q = questions[0]
+print(f"\nQ: {q}")
+response = query_engine.query(q)
+print("A:", response)
+
+for node_with_score in response.source_nodes:
+    print(f"Similarity Score: {node_with_score.score:.4f}")
+    print("-" * 30)
 
 # The response in similarity_top_k=5 is a bit more verbose than that of similarilty_top_k=1
 # The content are basically identical, with similarity_top_k=5 included a little bit more detal.
@@ -261,10 +265,11 @@ for q in question:
     print(f"\nQ: {q}")
     response = query_engine.query(q)
     print("A:", response)
+    print("-" * 30)
     
     for node_with_score in response.source_nodes:
         print(f"Similarity Score: {node_with_score.score:.4f}")
-        print(f"Text Snippet: {node_with_score.node.get_content()[:150]}...")
+        print(f"Retreived Chunks: {node_with_score.node.get_content()}")
         print("-" * 30)
 
 # I expected the model would state the mission of the company first, then pick the relevant part of the `employee_benefits.pdf` and `partnership.pdf` to
@@ -293,10 +298,12 @@ relevancy_evaluator = RelevancyEvaluator(llm=llm)
 q = "What employee benefits does BrightLeaf offer?"
 response = query_engine.query(q)
 print(f"BrightLeaf query: {q}")
+print()
 
 # Evaluate faithfulness and relevancy
 faithfulness_result = faithfulness_evaluator.evaluate_response(query=q, response=response)
 print("Faithfulness Evaluation: " + str(faithfulness_result.score))
+print()
 
 relevancy_result = relevancy_evaluator.evaluate_response(query=q, response=response)
 print("Relevancy Result: " + str(relevancy_result.score))
@@ -307,10 +314,12 @@ print("-" * 30)
 q = "Which LLM does BrightLeaf use?"
 response = query_engine.query(q)
 print(f"Out of context query: {q}")
+print()
 
 # Evaluate faithfulness and relevancy
 faithfulness_result = faithfulness_evaluator.evaluate_response(query=q, response=response)
 print("Faithfulness Evaluation: " + str(faithfulness_result.score))
+print()
 
 relevancy_result = relevancy_evaluator.evaluate_response(query=q, response=response)
 print("Relevancy Result: " + str(relevancy_result.score))
